@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import SpecialPromotions from "./SpecialPromotions.jsx";
 import {
   Typography,
-  Grid,
   Card,
   CardContent,
   TextField,
@@ -14,6 +13,7 @@ import {
   Select,
   Snackbar,
 } from "@mui/material";
+import Grid from '@mui/material/Grid';
 import { PeopleAlt, Hotel, Send } from "@mui/icons-material";
 import { useData } from "../hooks/DataContext.jsx";
 import { useSpring, animated } from "react-spring";

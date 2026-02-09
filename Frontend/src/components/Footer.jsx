@@ -1,5 +1,6 @@
 import React from "react";
-import { Typography, TextField, Button, Grid, Divider } from "@mui/material";
+import { Typography, TextField, Button, Divider } from "@mui/material";
+import Grid from '@mui/material/Grid';
 import { motion } from "framer-motion";
 import { NavLink } from 'react-router-dom';
 import MountainIcon from "@mui/icons-material/Terrain";

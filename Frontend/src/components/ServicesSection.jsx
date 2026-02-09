@@ -1,5 +1,6 @@
 import React from "react";
-import { Typography, Grid, Card, CardContent, CardMedia } from "@mui/material";
+import { Typography, Card, CardContent, CardMedia } from "@mui/material";
+import Grid from '@mui/material/Grid';
 import { useSpring, animated } from "react-spring";
 import {
   MdRestaurant,

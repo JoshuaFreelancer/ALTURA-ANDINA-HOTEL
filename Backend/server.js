@@ -1,58 +1,33 @@
-const express = require("express");
-const cors = require("cors");
-const sgMail = require("@sendgrid/mail");
+require("dotenv").config(); // Importante: Cargar variables ANTES de todo
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const multer = require("multer");
-const morgan = require("morgan");
-const Joi = require("joi");
-require("dotenv").config();
+const app = require("./app");
 
-// Importa la función de semillas
-const { cargarHabitacionesDeEjemplo } = require("./seeds");
+// Importamos el orquestador de semillas
+const { ejecutarSemillas } = require("./seeds");
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-mongoose.connect(process.env.MONGODB_URI);
-
-const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
-app.use(cors());
-app.use(morgan("dev"));
-
-// Aquí irían las rutas para las habitaciones
-const habitacionRoutes = require("./routes/habitacionRoutes");
-app.use("/habitaciones", habitacionRoutes);
-
-app.post("/send-email", async (req, res) => {
+// Función asíncrona para iniciar todo en orden
+const iniciarServidor = async () => {
   try {
-    const { email, subject, text, html } = req.body;
-    const mailOptions = {
-      to: email,
-      from: process.env.EMAIL_FROM,
-      subject: subject,
-      text: text,
-      html: html,
-    };
-    await sgMail.send(mailOptions);
-    res.status(200).json({ message: "Correo electrónico enviado correctamente" });
-  } catch (error) {
-    console.error("Error al enviar el correo electrónico:", error);
-    res.status(500).json({ error: "Error al enviar el correo electrónico" });
-  }
-});
+    // 1. Conectar a Base de Datos
+    // Eliminé las opciones deprecated ya que Mongoose 6+ no las necesita
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("✅ Conectado a MongoDB exitosamente");
 
-// Carga las habitaciones de ejemplo al iniciar el servidor
-app.listen(PORT, async () => {
-  try {
-    await cargarHabitacionesDeEjemplo();
-    console.log("Habitaciones de ejemplo cargadas exitosamente");
-    console.log(`Servidor escuchando en el puerto ${PORT}`);
+    // 2. Cargar semillas (Usuarios Admin y Habitaciones)
+    // Esto verificará si existen y los creará si no.
+    await ejecutarSemillas();
+
+    // 3. Encender el servidor
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor escuchando en el puerto ${PORT}`);
+      console.log(`🔗 API disponible en http://localhost:${PORT}/api`);
+    });
   } catch (error) {
-    console.error("Error al cargar las habitaciones de ejemplo:", error);
-    console.log(`Servidor escuchando en el puerto ${PORT}`);
+    console.error("❌ Error CRÍTICO al iniciar el servidor:", error);
+    process.exit(1); // Detener el proceso si falla la DB
   }
-});
+};
+
+iniciarServidor();

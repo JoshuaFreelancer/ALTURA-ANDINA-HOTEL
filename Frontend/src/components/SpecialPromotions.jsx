@@ -1,5 +1,5 @@
-import React from 'react';
-import { Typography, Grid, Card, CardContent, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { Typography, Card, CardContent, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { MdLocalOffer, MdFreeBreakfast, MdAirplanemodeActive, MdHotel, MdFlightTakeoff } from 'react-icons/md';
 import { useSpring, animated } from 'react-spring';
 

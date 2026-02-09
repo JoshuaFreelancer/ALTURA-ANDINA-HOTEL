@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Grid, Card, CardContent, Typography, CardActions, Button, Modal, Paper, TextField } from '@mui/material';
+import { useState } from 'react';
+import { Card, CardContent, Typography, CardActions, Button, Modal, Paper, TextField } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { Close, People } from '@mui/icons-material';
 import { useHabitaciones } from '../hooks/useHabitacionesContext';
 

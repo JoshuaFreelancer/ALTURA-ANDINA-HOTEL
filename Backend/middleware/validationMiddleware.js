@@ -76,10 +76,23 @@ const bookingSchema = Joi.object({
   }),
 });
 
+// NUEVO: Middleware para mapear archivos de Multer al Body para que Joi lo entienda
+const parseImages = (req, res, next) => {
+  // Si Multer procesó archivos, extraemos sus rutas (URLs de Cloudinary)
+  if (req.files && req.files.length > 0) {
+    req.body.images = req.files.map((file) => file.path);
+  } else {
+    // Si no hay archivos nuevos, y no enviaron imágenes en el body, 
+    // Joi se encargará de lanzar el error si es requerido.
+  }
+  next();
+};
+
 module.exports = {
   validate,
   registerSchema,
   loginSchema,
   roomSchema,
   bookingSchema,
+  parseImages,
 };

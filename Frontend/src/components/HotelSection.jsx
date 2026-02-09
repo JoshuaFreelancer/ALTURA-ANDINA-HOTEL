@@ -1,50 +1,80 @@
 import React from 'react';
-import { Typography, Grid, Box, Card } from '@mui/material'; // Todo de MUI para consistencia
-import { useSpring, animated } from 'react-spring';
+import { 
+  Box, 
+  Heading, 
+  Text, 
+  Container, 
+  SimpleGrid, 
+  Image 
+} from '@chakra-ui/react';
+import { motion } from 'framer-motion';
+
+// Creamos un Box animado para envolver el texto
+const MotionBox = motion(Box);
 
 const HotelSection = () => {
-  const textProps = useSpring({
-    from: { opacity: 0, transform: 'translate3d(-100%, 0, 0)' },
-    to: { opacity: 1, transform: 'translate3d(0, 0, 0)' },
-    config: { tension: 80, friction: 14 },
-  });
-
   return (
-    <section id="hotel-section" className="py-12 bg-gray-100">
-      <div className="container mx-auto px-4">
-        {/* Grid Container V1 */}
-        <Grid container spacing={6} alignItems="center">
+    <Box as="section" bg="gray.50" py={{ base: 12, md: 20 }} id="hotel-section">
+      <Container maxW="container.xl">
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10} alignItems="center">
           
-          <Grid item xs={12} md={6}>
-            <animated.div style={textProps}>
-              <Box>
-                <Typography variant="h2" gutterBottom sx={{ color: '#2c5282', fontWeight: 'bold' }}>
-                  Bienvenido a Altura Andina
-                </Typography>
-                <Typography variant="h5" gutterBottom sx={{ color: '#4a5568' }}>
-                  Descubre una experiencia única en el corazón de Mérida
-                </Typography>
-                <Typography variant="body1" sx={{ fontFamily: 'Lato', fontSize: '1.1rem', color: '#2d3748' }}>
-                  El Altura Andina Hotel & Spa es un lugar de ensueño ubicado en el corazón de la hermosa ciudad de Mérida.
-                  Con vistas espectaculares y servicio excepcional.
-                </Typography>
-              </Box>
-            </animated.div>
-          </Grid>
+          {/* --- COLUMNA DE TEXTO --- */}
+          <MotionBox
+            // Animación: Entra desde la izquierda (-50px) y aparece
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }} // Se activa cuando haces scroll y lo ves
+            viewport={{ once: true, amount: 0.5 }} // Se anima una sola vez
+            transition={{ duration: 0.8 }}
+          >
+            <Heading 
+              as="h2" 
+              size="2xl" 
+              mb={6} 
+              color="brand.600" 
+              fontFamily="heading"
+            >
+              Bienvenido a Altura Andina
+            </Heading>
+            
+            <Heading 
+              as="h3" 
+              size="md" 
+              mb={4} 
+              color="brand.500" 
+              fontWeight="medium"
+            >
+              Descubre una experiencia única en el corazón de Mérida
+            </Heading>
 
-          <Grid item xs={12} md={6}>
-            <Card sx={{ boxShadow: 3, borderRadius: 2, overflow: 'hidden' }}>
-              <img 
-                src="assets/images/Hotel.png" 
-                alt="Hotel Altura Andina" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-              />
-            </Card>
-          </Grid>
+            <Text fontSize="lg" color="gray.600" lineHeight="tall" textAlign="justify">
+              El Altura Andina Hotel & Spa es un lugar de ensueño ubicado en el corazón 
+              de la hermosa ciudad de Mérida. Con vistas espectaculares y servicio excepcional, 
+              te invitamos a desconectar de la rutina y conectar con la naturaleza sin perder 
+              el confort que mereces.
+            </Text>
+          </MotionBox>
 
-        </Grid>
-      </div>
-    </section>
+          {/* --- COLUMNA DE IMAGEN --- */}
+          <Box
+            borderRadius="2xl"
+            boxShadow="2xl"
+            overflow="hidden"
+            height={{ base: "300px", md: "400px" }}
+          >
+            <Image 
+              src="/assets/images/Hotel.png" // Asegúrate de que la ruta empiece con /
+              alt="Hotel Altura Andina" 
+              w="100%" 
+              h="100%" 
+              objectFit="cover"
+              transition="transform 0.5s ease"
+              _hover={{ transform: 'scale(1.05)' }} // Efecto zoom suave al pasar el mouse
+            />
+          </Box>
+
+        </SimpleGrid>
+      </Container>
+    </Box>
   );
 }
 

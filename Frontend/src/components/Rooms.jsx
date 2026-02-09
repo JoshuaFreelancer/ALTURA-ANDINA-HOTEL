@@ -1,98 +1,302 @@
-import { useState } from 'react';
-import { Card, CardContent, Typography, CardActions, Button, Modal, Paper, TextField } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import { Close, People } from '@mui/icons-material';
-import { useHabitaciones } from '../hooks/useHabitacionesContext';
+import React, { useState } from "react";
+import {
+  Box,
+  Heading,
+  Text,
+  Image,
+  Button,
+  SimpleGrid,
+  Stack,
+  Badge,
+  useColorModeValue,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  Textarea,
+  Flex,
+  Icon,
+  Spinner,
+  Center,
+  Container,
+  List,
+  ListItem,
+  ListIcon,
+} from "@chakra-ui/react";
+import { FaUserFriends, FaImages, FaCheckCircle, FaStar } from "react-icons/fa";
+import { useHabitaciones } from "../hooks/useHabitacionesContext";
 
 const Habitaciones = () => {
-  const { habitaciones } = useHabitaciones();
+  // 1. ZONA DE HOOKS
+  const { filteredHabitaciones, loading } = useHabitaciones();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedHabitacion, setSelectedHabitacion] = useState(null);
-  const [reviewText, setReviewText] = useState('');
+  const [reviewText, setReviewText] = useState("");
 
+  // Colores del tema
+  const bgCard = useColorModeValue("white", "gray.800");
+  const textColor = useColorModeValue("gray.600", "gray.200");
+  const headingColor = useColorModeValue("gray.700", "white");
+
+  // 2. FUNCIONES
   const handleVerDetalles = (habitacion) => {
     setSelectedHabitacion(habitacion);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedHabitacion(null);
+    onOpen();
   };
 
   const handleSubmitReview = () => {
-    setReviewText('');
-    handleCloseModal();
+    console.log(`Review para ${selectedHabitacion._id}: ${reviewText}`);
+    // Aquí iría tu lógica de axios.post para guardar la review
+    setReviewText("");
+    onClose();
   };
 
-  return (
-    <div className="container mx-auto">
-      <Typography variant="h4" gutterBottom className="my-4">
-        Habitaciones Disponibles
-      </Typography>
-      <Grid container spacing={3}>
-        {habitaciones.map(habitacion => (
-          <Grid item xs={12} sm={6} md={4} key={habitacion._id}>
-            <Card>
-              <CardContent>
-                <Typography variant="h5" component="h2" className="mb-2">
-                  {habitacion.descripcion}
-                </Typography>
-                <div className="flex justify-center items-center mb-2">
-                  {habitacion.imagenes.length > 0 ? (
-                    <img src={habitacion.imagenes[0]} alt={habitacion.descripcion} className="w-full h-auto" />
-                  ) : (
-                    <Typography variant="body2" color="textSecondary">No hay imagen disponible</Typography>
-                  )}
-                </div>
-                <Typography color="textSecondary" className="mb-2">
-                  <People /> Capacidad Máxima: {habitacion.capacidadMaxima} personas
-                </Typography>
-              </CardContent>
-              <CardActions className="justify-between">
-                <Button size="small" color="primary" onClick={() => handleVerDetalles(habitacion)}>
-                  Ver Detalles
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+  // 3. RENDERIZADO CONDICIONAL
+  if (loading) {
+    return (
+      <Center h="300px" w="100%">
+        <Stack align="center" spacing={4}>
+          <Spinner size="xl" color="brand.500" thickness="4px" speed="0.65s" />
+          <Text color="brand.500" fontWeight="bold">
+            Cargando habitaciones...
+          </Text>
+        </Stack>
+      </Center>
+    );
+  }
 
-      {/* Modal para mostrar más detalles y dejar un review */}
-      <Modal open={selectedHabitacion !== null} onClose={handleCloseModal}>
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 p-4">
-          <Paper elevation={3} className="w-full max-w-md p-4">
-            <div className="flex justify-between items-center mb-4">
-              <Typography variant="h5" gutterBottom>
-                Detalles de la Habitación
-              </Typography>
-              <Button onClick={handleCloseModal}>
-                <Close />
-              </Button>
-            </div>
-            <Typography color="textSecondary" className="mb-2">
-              Descripción: {selectedHabitacion?.descripcion}
-            </Typography>
-            <Typography color="textSecondary" className="mb-2">
-              Capacidad Máxima: {selectedHabitacion?.capacidadMaxima} personas
-            </Typography>
-            <Typography color="textSecondary" className="mb-2">
-              {/* Agrega más detalles de la habitación aquí */}
-            </Typography>
-            <TextField
-              label="Deja tu review"
-              variant="outlined"
-              fullWidth
-              multiline
+  if (!filteredHabitaciones || filteredHabitaciones.length === 0) {
+    return (
+      <Center h="200px">
+        <Text fontSize="lg" color="gray.500">
+          No se encontraron habitaciones disponibles.
+        </Text>
+      </Center>
+    );
+  }
+
+  return (
+    <Container maxW="container.xl" py={8}>
+      <Heading
+        as="h2"
+        size="xl"
+        mb={8}
+        textAlign="center"
+        color="brand.600"
+        fontFamily="heading"
+      >
+        Nuestras Habitaciones
+      </Heading>
+
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={10}>
+        {filteredHabitaciones.map((habitacion) => (
+          <Box
+            key={habitacion._id} // MongoDB usa _id (con guion bajo)
+            maxW={"445px"}
+            w={"full"}
+            bg={bgCard}
+            boxShadow={"2xl"}
+            rounded={"md"}
+            p={6}
+            overflow={"hidden"}
+            transition="transform 0.2s"
+            _hover={{ transform: "scale(1.02)" }}
+          >
+            {/* IMAGEN PRINCIPAL */}
+            <Box
+              h={"210px"}
+              bg={"gray.100"}
+              mt={-6}
+              mx={-6}
+              mb={6}
+              pos={"relative"}
+              overflow="hidden"
+            >
+              {habitacion.images && habitacion.images.length > 0 ? (
+                <Image
+                  src={habitacion.images[0]} // Usamos 'images' (inglés)
+                  alt={habitacion.title}
+                  objectFit={"cover"}
+                  w="100%"
+                  h="100%"
+                />
+              ) : (
+                <Center h="100%">
+                  <Stack align="center" color="gray.400">
+                    <Icon as={FaImages} boxSize={10} />
+                    <Text>Sin imagen</Text>
+                  </Stack>
+                </Center>
+              )}
+            </Box>
+
+            <Stack>
+              <Text
+                color={"brand.500"}
+                textTransform={"uppercase"}
+                fontWeight={800}
+                fontSize={"xs"}
+                letterSpacing={1.1}
+              >
+                {habitacion.roomType} {/* Usamos 'roomType' */}
+              </Text>
+
+              <Heading
+                color={headingColor}
+                fontSize={"2xl"}
+                fontFamily={"body"}
+              >
+                {habitacion.title} {/* Usamos 'title' */}
+              </Heading>
+
+              <Text color={textColor} noOfLines={2}>
+                {habitacion.description} {/* Usamos 'description' */}
+              </Text>
+
+              {/* RATING (Nuevo: Usando averageRating de tu DB) */}
+              <Flex align="center">
+                <Icon as={FaStar} color="yellow.400" mr={1} />
+                <Text fontWeight="bold" fontSize="sm">
+                  {habitacion.averageRating || "Nuevo"}
+                </Text>
+              </Flex>
+            </Stack>
+
+            <Stack
+              mt={6}
+              direction={"row"}
+              spacing={4}
+              align={"center"}
+              justify="space-between"
+            >
+              <Badge px={2} py={1} bg="gray.50" fontWeight={"400"} rounded="md">
+                <Flex align="center">
+                  <Icon as={FaUserFriends} mr={2} color="brand.500" />
+                  Max: {habitacion.capacity} {/* Usamos 'capacity' */}
+                </Flex>
+              </Badge>
+              <Text fontWeight="bold" fontSize="xl" color="brand.600">
+                ${habitacion.pricePerNight}{" "}
+                <span style={{ fontSize: "0.8rem", color: "gray" }}>
+                  /noche
+                </span>
+              </Text>
+            </Stack>
+
+            <Button
+              w={"full"}
+              mt={8}
+              bg={"brand.500"}
+              color={"white"}
+              rounded={"md"}
+              _hover={{
+                transform: "translateY(-2px)",
+                boxShadow: "lg",
+                bg: "brand.600",
+              }}
+              onClick={() => handleVerDetalles(habitacion)}
+            >
+              Ver Detalles
+            </Button>
+          </Box>
+        ))}
+      </SimpleGrid>
+
+      {/* --- MODAL DETALLES --- */}
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size="xl"
+        scrollBehavior="inside"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader textTransform="capitalize">
+            {selectedHabitacion?.title}
+          </ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            {selectedHabitacion?.images?.length > 0 && (
+              <Image
+                src={selectedHabitacion.images[0]}
+                borderRadius="md"
+                mb={4}
+                maxH="300px"
+                w="100%"
+                objectFit="cover"
+              />
+            )}
+
+            <Heading size="sm" mb={2} color="brand.600">
+              Descripción
+            </Heading>
+            <Text color="gray.600" mb={4}>
+              {selectedHabitacion?.description}
+            </Text>
+
+            {/* AMENITIES (Lista de comodidades) */}
+            {selectedHabitacion?.amenities && (
+              <Box mb={6}>
+                <Heading size="sm" mb={2} color="brand.600">
+                  Comodidades
+                </Heading>
+                <SimpleGrid columns={2} spacing={2}>
+                  {selectedHabitacion.amenities.map((amenity, index) => (
+                    <Flex key={index} align="center">
+                      <Icon as={FaCheckCircle} color="green.500" mr={2} />
+                      <Text fontSize="sm">{amenity}</Text>
+                    </Flex>
+                  ))}
+                </SimpleGrid>
+              </Box>
+            )}
+
+            <Stack direction="row" mb={6} spacing={4}>
+              <Badge colorScheme="blue" p={2} borderRadius="md">
+                Capacidad: {selectedHabitacion?.capacity} Personas
+              </Badge>
+              <Badge
+                colorScheme={selectedHabitacion?.isAvailable ? "green" : "red"}
+                p={2}
+                borderRadius="md"
+              >
+                {selectedHabitacion?.isAvailable
+                  ? "Disponible"
+                  : "No Disponible"}
+              </Badge>
+            </Stack>
+
+            <Heading size="sm" mb={2}>
+              Deja tu opinión
+            </Heading>
+            <Textarea
+              placeholder="¿Qué te pareció esta habitación?"
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}
-              className="mb-4"
+              focusBorderColor="brand.500"
             />
-            <Button variant="contained" color="primary" onClick={handleSubmitReview}>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onClose}>
+              Cerrar
+            </Button>
+            <Button
+              colorScheme="blue"
+              bg="brand.500"
+              onClick={handleSubmitReview}
+            >
               Enviar Review
             </Button>
-          </Paper>
-        </div>
+          </ModalFooter>
+        </ModalContent>
       </Modal>
-    </div>
+    </Container>
   );
 };
 

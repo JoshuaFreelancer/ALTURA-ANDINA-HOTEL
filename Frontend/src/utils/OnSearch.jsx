@@ -1,92 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { useSpring, animated } from 'react-spring';
-import { TextField, IconButton, Button } from '@mui/material';
-import { Search } from '@mui/icons-material';
-import { useHabitaciones } from '../hooks/useHabitacionesContext';
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Input,
+  Button,
+  InputGroup,
+  InputLeftElement,
+  Stack,
+  Icon,
+  FormControl,
+} from "@chakra-ui/react";
+import { FaSearch, FaUndo, FaUserFriends } from "react-icons/fa";
+import { useHabitaciones } from "../hooks/useHabitacionesContext";
 
 const OnSearch = () => {
   const { habitaciones, setFilteredHabitaciones } = useHabitaciones();
-  const [personasFilter, setPersonasFilter] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [capacity, setCapacity] = useState("");
 
-  // Función de debounce para retrasar la actualización del estado de búsqueda
-  const debounce = (func, delay) => {
-    let timeoutId;
-    return (...args) => {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
-
-  // Función para manejar el cambio en el término de búsqueda con debounce
-  const handleSearchChange = debounce((event) => {
-    setSearchTerm(event.target.value);
-  }, 300); // Delay de 300 milisegundos
-
-  // Función para filtrar las habitaciones según la cantidad máxima de personas
+  // --- EFECTO DE FILTRADO ---
+  // Se ejecuta automáticamente cada vez que cambia 'capacity' o la lista de habitaciones.
+  // Esto elimina la necesidad de funciones debounce complejas para este caso simple.
   useEffect(() => {
-    const filterHabitaciones = () => {
-      let filteredHabitaciones = habitaciones;
+    // Si no hay datos, no hacemos nada
+    if (!habitaciones) return;
 
-      // Filtrar por cantidad de personas si hay un filtro definido
-      if (personasFilter.trim() !== '') {
-        filteredHabitaciones = filteredHabitaciones.filter(habitacion =>
-          habitacion.capacidadMaxima <= parseInt(personasFilter)
-        );
+    let result = habitaciones;
+
+    if (capacity !== "") {
+      const numPeople = parseInt(capacity);
+      if (!isNaN(numPeople)) {
+        // CORRECCIÓN LÓGICA:
+        // Buscamos habitaciones donde quepa la gente (Capacidad >= Búsqueda)
+        result = result.filter((h) => h.capacity >= numPeople);
       }
+    }
 
-      // Actualizar el estado de las habitaciones filtradas
-      setFilteredHabitaciones(filteredHabitaciones);
-    };
+    setFilteredHabitaciones(result);
+  }, [capacity, habitaciones, setFilteredHabitaciones]);
 
-    filterHabitaciones();
-  }, [personasFilter, habitaciones, setFilteredHabitaciones]);
-
-  // Función para resetear los filtros y mostrar todas las habitaciones
+  // --- RESET ---
   const handleResetFilters = () => {
-    setSearchTerm('');
-    setPersonasFilter('');
-    filterHabitaciones(); // Volver a aplicar los filtros para mostrar todas las habitaciones
+    setCapacity("");
+    // No necesitamos llamar a filter() aquí manualmente,
+    // el useEffect detectará el cambio a '' y reseteará la lista automáticamente.
   };
-  
-
-  // Animación de entrada para la barra de búsqueda
-  const searchAnimation = useSpring({
-    width: searchTerm === '' ? '0%' : '100%',
-    opacity: searchTerm === '' ? 0 : 1,
-  });
 
   return (
-    <div className="w-full my-4 flex justify-center items-center">
-      <animated.div style={searchAnimation} className="flex-grow max-w-md relative">
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          <Search />
-        </div>
-        <TextField
-          variant="outlined"
-          placeholder="Buscar por cantidad máxima de personas"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          fullWidth
-          InputProps={{
-            startAdornment: null,
-          }}
-          className="pl-10"
-        />
-      </animated.div>
-      <TextField
-        variant="outlined"
-        placeholder="Ingresar cantidad máxima de personas"
-        value={personasFilter}
-        onChange={(event) => setPersonasFilter(event.target.value)}
-        className="mx-4"
-      />
-      <Button variant="contained" onClick={handleResetFilters}>
-        Resetear Filtros
-      </Button>
-    </div>
+    <Box w="100%" py={6} px={4}>
+      <Stack
+        direction={{ base: "column", md: "row" }}
+        spacing={4}
+        align="center"
+        justify="center"
+        maxW="800px"
+        mx="auto"
+      >
+        {/* Input de Búsqueda */}
+        <FormControl maxW={{ base: "100%", md: "400px" }}>
+          <InputGroup size="lg">
+            <InputLeftElement pointerEvents="none">
+              <Icon as={FaUserFriends} color="gray.400" />
+            </InputLeftElement>
+            <Input
+              type="number"
+              placeholder="¿Cuántas personas son?"
+              value={capacity}
+              onChange={(e) => setCapacity(e.target.value)}
+              bg="white"
+              borderColor="gray.300"
+              _focus={{
+                borderColor: "brand.500",
+                boxShadow: "0 0 0 1px var(--chakra-colors-brand-500)",
+              }}
+              _hover={{
+                borderColor: "brand.400",
+              }}
+            />
+          </InputGroup>
+        </FormControl>
+
+        {/* Botón de Reset (Solo aparece si hay filtro) */}
+        {capacity && (
+          <Button
+            leftIcon={<FaUndo />}
+            colorScheme="gray"
+            variant="ghost"
+            onClick={handleResetFilters}
+            size="lg"
+            _hover={{ bg: "brand.100", color: "brand.600" }}
+          >
+            Ver todas
+          </Button>
+        )}
+      </Stack>
+    </Box>
   );
 };
 

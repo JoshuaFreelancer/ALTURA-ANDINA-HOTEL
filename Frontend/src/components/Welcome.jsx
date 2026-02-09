@@ -1,100 +1,134 @@
-import { useState, useEffect } from "react";
+import React from "react";
 import { NavLink } from "react-router-dom";
 import Snowfall from "react-snowfall";
-import { useSpring, animated } from "react-spring";
+import { 
+  Box, 
+  Flex, 
+  Heading, 
+  Button, 
+  Stack, 
+  IconButton, 
+  useBreakpointValue 
+} from "@chakra-ui/react";
+import { motion } from "framer-motion";
+import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 
-// Material UI Components
-import { Button } from "@mui/material";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
+// Creamos componentes animados compatibles con Chakra
+const MotionHeading = motion(Heading);
+const MotionBox = motion(Box);
 
 function Welcome() {
-  const [showTitle, setShowTitle] = useState(false);
-
-  // CORRECCIÓN IMPORTANTE:
-  // Los cambios de estado basados en tiempo deben ir dentro de useEffect.
-  // Esto evita bucles infinitos y errores de renderizado.
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowTitle(true);
-    }, 500);
-
-    // Limpiamos el timer si el componente se desmonta antes de los 500ms
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Configuración de la animación del título con React Spring
-  const titleProps = useSpring({
-    opacity: showTitle ? 1 : 0,
-    transform: showTitle ? "translateY(0)" : "translateY(-20px)",
-    config: { tension: 200, friction: 20 },
-  });
+  // Ajuste de altura responsivo
+  const height = useBreakpointValue({ base: "400px", md: "500px", lg: "600px" });
 
   const handleRedirect = (url) => {
-    window.open(url, "_blank", "noopener,noreferrer"); // Buena práctica de seguridad
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
-    <div className="relative w-full">
-      {/* Efecto de nieve (z-index ajustado para no bloquear botones) */}
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 10 }}>
-         <Snowfall snowflakeCount={40} color="white" />
-      </div>
+    <Box position="relative" w="100%" h={height} overflow="hidden">
+      
+      {/* 1. Efecto de Nieve (z-index bajo para no tapar botones) */}
+      <Box position="absolute" top={0} left={0} w="100%" h="100%" zIndex={10} pointerEvents="none">
+        <Snowfall snowflakeCount={40} color="white" />
+      </Box>
 
-      {/* Contenedor principal con imagen de fondo */}
-      <div
-        className="bg-cover bg-center w-full h-96 md:h-[500px] relative text-center flex items-center justify-center"
-        style={{ backgroundImage: `url(/assets/images/Welcome.jpg)` }}
+      {/* 2. Imagen de Fondo y Overlay */}
+      <Flex
+        w="100%"
+        h="100%"
+        bgImage="url('/assets/images/Welcome.jpg')" // Asegúrate que esta ruta exista en /public
+        bgSize="cover"
+        bgPosition="center"
+        align="center"
+        justify="center"
+        position="relative"
       >
-        {/* Overlay oscuro para mejorar legibilidad */}
-        <div className="absolute inset-0 bg-black opacity-40"></div>
+        {/* Overlay Oscuro (blackAlpha es genial para transparencias) */}
+        <Box 
+          position="absolute" 
+          inset={0} 
+          bg="blackAlpha.500" 
+          zIndex={1} 
+        />
 
-        <div className="relative z-20 flex flex-col items-center justify-center font-playfair-display text-white px-4">
-          {/* Título animado */}
-          <animated.h4
-            style={titleProps}
-            className="text-2xl lg:text-5xl md:text-4xl sm:text-3xl font-bold mb-8 whitespace-pre-wrap drop-shadow-lg"
+        {/* 3. Contenido Central */}
+        <Flex 
+          direction="column" 
+          align="center" 
+          zIndex={20} 
+          px={4} 
+          textAlign="center"
+        >
+          {/* Título Animado con Framer Motion */}
+          <MotionHeading
+            as="h1"
+            color="white"
+            fontFamily="heading"
+            fontWeight="bold"
+            fontSize={{ base: "3xl", md: "5xl", lg: "6xl" }}
+            mb={8}
+            textShadow="2px 2px 4px rgba(0,0,0,0.6)"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
             ¡Bienvenido a tu hogar lejos de casa!
-          </animated.h4>
+          </MotionHeading>
 
           {/* Botón de Reserva */}
-          <NavLink to="/contacto" style={{ textDecoration: 'none' }}>
+          <NavLink to="/contacto">
             <Button
-              variant="contained"
-              size="large"
-              sx={{
-                backgroundColor: "#e53e3e", // Color personalizado (ejemplo rojo)
-                "&:hover": { backgroundColor: "#c53030" },
-                fontFamily: "Lato, sans-serif",
-                padding: "10px 30px"
-              }}
+              size="lg"
+              colorScheme="red" // Usa un rojo estándar bonito o tu 'brand.500'
+              bg="red.600"
+              _hover={{ bg: "red.700", transform: "scale(1.05)" }}
+              fontSize="xl"
+              px={10}
+              py={7}
+              shadow="lg"
+              fontFamily="body"
             >
               Reserva ahora
             </Button>
           </NavLink>
-        </div>
+        </Flex>
 
-        {/* Iconos de redes sociales */}
-        <div className="absolute bottom-4 right-4 flex gap-4 z-30">
-          <SocialIcon Icon={FacebookIcon} onClick={() => handleRedirect("https://www.facebook.com")} />
-          <SocialIcon Icon={TwitterIcon} onClick={() => handleRedirect("https://twitter.com")} />
-          <SocialIcon Icon={InstagramIcon} onClick={() => handleRedirect("https://www.instagram.com")} />
-          <SocialIcon Icon={LinkedInIcon} onClick={() => handleRedirect("https://www.linkedin.com")} />
-        </div>
-      </div>
-    </div>
+        {/* 4. Iconos de Redes Sociales (Esquina Inferior) */}
+        <Stack 
+          direction="row" 
+          spacing={4} 
+          position="absolute" 
+          bottom={6} 
+          right={6} 
+          zIndex={30}
+        >
+          <SocialButton icon={<FaFacebook />} onClick={() => handleRedirect("https://facebook.com")} />
+          <SocialButton icon={<FaTwitter />} onClick={() => handleRedirect("https://twitter.com")} />
+          <SocialButton icon={<FaInstagram />} onClick={() => handleRedirect("https://instagram.com")} />
+          <SocialButton icon={<FaLinkedin />} onClick={() => handleRedirect("https://linkedin.com")} />
+        </Stack>
+      </Flex>
+    </Box>
   );
 }
 
-// Pequeño componente auxiliar para limpiar el código repetitivo de iconos
-const SocialIcon = ({ Icon, onClick }) => (
-  <Icon
-    className="text-white cursor-pointer transition duration-300 transform hover:scale-110 hover:text-gray-300"
-    style={{ fontSize: 28 }} // Aumenté un poco el tamaño para mejor UX
+// Componente pequeño para los botones sociales
+const SocialButton = ({ icon, onClick }) => (
+  <IconButton
+    icon={icon}
     onClick={onClick}
+    isRound
+    variant="ghost"
+    color="white"
+    fontSize="24px"
+    _hover={{ 
+      bg: "whiteAlpha.300", 
+      transform: "translateY(-3px)",
+      color: "brand.300" 
+    }}
+    transition="all 0.3s"
+    aria-label="Social Media"
   />
 );
 

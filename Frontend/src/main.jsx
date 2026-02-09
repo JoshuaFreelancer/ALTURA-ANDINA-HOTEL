@@ -1,63 +1,64 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './index.css';
-import { ChakraProvider } from '@chakra-ui/react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { extendTheme } from '@chakra-ui/react';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 
+// IMPORTANTE: Asegúrate de tener instaladas las fuentes.
+// Si no las tienes, ejecuta: npm install @fontsource/lato @fontsource/playfair-display
+import "@fontsource/lato/400.css";
+import "@fontsource/lato/700.css";
+import "@fontsource/playfair-display/400.css";
+import "@fontsource/playfair-display/700.css";
+
+// 1. Definimos tu paleta de colores limpia
 const colors = {
   brand: {
-    200: '#DCE9F5',
-    300: '#BCE7F7',
-    400: '#ABD8EC',
-    500: '#6998A7',
-    600: '#313F3E',
+    50: "#F0F7FC", // (Opcional) Agregué un tono muy claro para fondos suaves
+    100: "#E6F0F8", // (Opcional)
+    200: "#DCE9F5", // Tu color original
+    300: "#BCE7F7", // Tu color original
+    400: "#ABD8EC", // Tu color original
+    500: "#6998A7", // Tu color PRIMARIO
+    600: "#313F3E", // Tu color de TEXTO/OSCURO
+    700: "#283332", // (Opcional) Un tono más oscuro para hovers
+    800: "#1E2626", // (Opcional)
+    900: "#151A1A", // (Opcional)
   },
 };
 
-const fonts = {
-  body: 'Lato, sans-serif',
-  heading: 'Playfair Display, serif',
-};
-
-// Define Material-UI theme
-const materialTheme = createTheme({
-  palette: {
-    primary: {
-      main: colors.brand[500],
-    },
+// 2. Extendemos el tema de Chakra
+const theme = extendTheme({
+  colors,
+  fonts: {
+    heading: `'Playfair Display', serif`,
+    body: `'Lato', sans-serif`,
   },
-  typography: {
-    fontFamily: fonts.body,
-    h1: {
-      fontFamily: fonts.heading,
-    },
-    h2: {
-      fontFamily: fonts.heading,
-    },
-    h3: {
-      fontFamily: fonts.heading,
+  // Configuración global para que toda la app tome tus estilos base
+  styles: {
+    global: {
+      body: {
+        bg: "gray.50", // Un fondo gris muy suave por defecto
+        color: "brand.600", // Tu color de texto por defecto
+      },
+      a: {
+        color: "brand.500",
+        _hover: {
+          textDecoration: "underline",
+        },
+      },
     },
   },
 });
 
-// Define Chakra UI theme
-const chakraTheme = extendTheme({
-  colors: {
-    brand: colors.brand,
-  },
-  fonts,
-});
-
-const rootElement = document.getElementById('root');
+const rootElement = document.getElementById("root");
 const root = ReactDOM.createRoot(rootElement);
+
 root.render(
   <React.StrictMode>
-    <ChakraProvider theme={chakraTheme}>
-      <ThemeProvider theme={materialTheme}>
-        <App />
-      </ThemeProvider>
+    {/* ¡Solo Chakra! Adiós ThemeProvider de MUI */}
+    <ChakraProvider theme={theme}>
+      <App />
     </ChakraProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

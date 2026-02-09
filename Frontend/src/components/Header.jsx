@@ -1,118 +1,197 @@
-import React, { useEffect, useState } from 'react';
-import { getWeatherByCity } from '../services/api';
-import MountainIcon from '@mui/icons-material/Terrain';
-import HomeIcon from '@mui/icons-material/Home';
-import BedIcon from '@mui/icons-material/Hotel';
-import ServiceIcon from '@mui/icons-material/RoomService';
-import ContactIcon from '@mui/icons-material/ContactPhone';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Flex,
+  Text,
+  IconButton,
+  Button,
+  Stack,
+  Collapse,
+  useDisclosure,
+  Icon,
+  Badge,
+  Container,
+} from "@chakra-ui/react";
+import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
+import {
+  FaMountain,
+  FaHome,
+  FaBed,
+  FaConciergeBell,
+  FaPhone,
+} from "react-icons/fa";
+import { Link as RouterLink } from "react-router-dom";
+import { motion } from "framer-motion";
+import { getWeatherByCity } from "../services/api";
+
+const MotionFlex = motion(Flex);
 
 function Header() {
+  const { isOpen, onToggle } = useDisclosure();
   const [weather, setWeather] = useState(null);
-  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const data = await getWeatherByCity('Mérida', 'es');
+        const data = await getWeatherByCity("Mérida", "es");
         setWeather(data);
       } catch (error) {
-        console.error('Error al obtener el clima:', error);
+        console.error("Error clima:", error);
       }
     };
-
     fetchWeather();
   }, []);
 
-  const toggleMenu = () => {
-    setShowMenu(!showMenu);
-  };
-
   return (
-    <header className="flex flex-col md:flex-row items-center justify-between px-4 py-4 md:py-6 bg-white shadow-md border-b-2 border-transparent transition-all duration-1500 flex-wrap">
-      {/* Logo */}
-      <div className="flex items-center">
-      <NavLink to="/">
-        <motion.div
-          initial={{ scale: 1 }}
-          whileHover={{ scale: 1.1 }}
-          className="mb-4 md:mb-0"
-        >
-          <h2 className="text-2xl text-brand-500 font-playfair-display flex items-center cursor-pointer">
-            <MountainIcon className="w-10 h-10 mr-2" />
-            Altura Andina
-          </h2>
-        </motion.div>
-        </NavLink >
-      </div>
-     
-      {/* Barra de navegación */}
-      <nav className="flex flex-wrap justify-center md:justify-start md:flex-grow">
-        <div className="md:hidden">
-          <button onClick={toggleMenu} className="text-gray-500 focus:outline-none">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-          </button>
-        </div>
-        {showMenu && (
-          <div className="md:hidden w-full mt-4">
-            <NavLink to="/">
-              <HomeIcon className="w-8 h-8 mr-2" />
-              Inicio
-            </NavLink>
-            <NavLink to="/habitaciones">
-              <BedIcon className="w-8 h-8 mr-2" />
-              Habitaciones
-            </NavLink>
-            <NavLink to="/servicios">
-              <ServiceIcon className="w-8 h-8 mr-2" />
-              Servicios
-            </NavLink>
-            <NavLink to="/contacto">
-              <ContactIcon className="w-8 h-8 mr-2" />
-              Contacto
-            </NavLink>
-          </div>
-        )}
-        <div className="hidden md:flex flex-wrap justify-center md:flex-grow">
-          <NavLink to="/">
-            <HomeIcon className="w-8 h-8 mr-2" />
-            Inicio
-          </NavLink>
-          <NavLink to="/habitaciones">
-            <BedIcon className="w-8 h-8 mr-2" />
-            Habitaciones
-          </NavLink>
-          <NavLink to="/servicios">
-            <ServiceIcon className="w-8 h-8 mr-2" />
-            Servicios
-          </NavLink>
-          <NavLink to="/contacto">
-            <ContactIcon className="w-8 h-8 mr-2" />
-            Contacto
-          </NavLink>
-        </div>
-      </nav>
+    <Box position="sticky" top="0" zIndex="1000" bg="white" shadow="sm">
+      <Container maxW="container.xl" px={4}>
+        <Flex minH={"70px"} align={"center"} justify={"space-between"}>
+          {/* Toggle Móvil */}
+          <Flex display={{ base: "flex", md: "none" }}>
+            <IconButton
+              onClick={onToggle}
+              icon={
+                isOpen ? (
+                  <CloseIcon w={3} h={3} />
+                ) : (
+                  <HamburgerIcon w={5} h={5} />
+                )
+              }
+              variant={"ghost"}
+              aria-label={"Toggle Navigation"}
+            />
+          </Flex>
 
-      {/* Mostrar el clima en la esquina derecha */}
-      <div className="text-center md:text-right mt-4 md:mt-0 md:flex-1">
-        {weather && (
-          <p className="text-sm md:text-base text-gray-500">
-            Clima: {weather.main.temp}°C, {weather.weather[0].description}
-          </p>
-        )}
-      </div>
-    </header>
+          {/* Logo */}
+          <Flex flex={{ base: 1 }} justify={{ base: "center", md: "start" }}>
+            <RouterLink to="/">
+              <MotionFlex
+                align="center"
+                cursor="pointer"
+                whileHover={{ scale: 1.05 }}
+              >
+                <Icon as={FaMountain} w={8} h={8} color="brand.500" mr={2} />
+                <Text
+                  textAlign={{ base: "center", md: "left" }}
+                  fontFamily={"heading"}
+                  fontWeight="bold"
+                  fontSize="xl"
+                  color={"brand.600"}
+                >
+                  Altura Andina
+                </Text>
+              </MotionFlex>
+            </RouterLink>
+
+            <Flex display={{ base: "none", md: "flex" }} ml={10}>
+              <DesktopNav />
+            </Flex>
+          </Flex>
+
+          {/* Clima */}
+          <Stack
+            flex={{ base: 1, md: 0 }}
+            justify={"flex-end"}
+            direction={"row"}
+            spacing={6}
+          >
+            {weather && (
+              <Badge
+                colorScheme="blue"
+                borderRadius="full"
+                px={3}
+                py={1}
+                display="flex"
+                alignItems="center"
+              >
+                <Text fontSize="sm" fontWeight="bold">
+                  {Math.round(weather.main.temp)}°C
+                </Text>
+                <Text
+                  fontSize="xs"
+                  ml={2}
+                  display={{ base: "none", md: "block" }}
+                >
+                  {weather.weather[0].description}
+                </Text>
+              </Badge>
+            )}
+          </Stack>
+        </Flex>
+
+        <Collapse in={isOpen} animateOpacity>
+          <MobileNav />
+        </Collapse>
+      </Container>
+    </Box>
   );
 }
 
-// Componente NavLink
-const NavLink = ({ to, children }) => (
-  <Link to={to} className="px-2 py-1 text-gray-500 flex items-center mx-2 transition-opacity duration-300 hover:opacity-75">
-    {children}
-  </Link>
-);
+// DATOS DE NAVEGACIÓN
+const NAV_ITEMS = [
+  { label: "Inicio", icon: FaHome, href: "/" },
+  { label: "Habitaciones", icon: FaBed, href: "/habitaciones" },
+  { label: "Servicios", icon: FaConciergeBell, href: "/servicios" },
+  { label: "Contacto", icon: FaPhone, href: "/contacto" },
+];
+
+// MENU DESKTOP
+const DesktopNav = () => {
+  return (
+    <Stack direction={"row"} spacing={4} align="center">
+      {NAV_ITEMS.map((navItem) => (
+        <Button
+          key={navItem.label}
+          as={RouterLink}
+          to={navItem.href}
+          variant="ghost"
+          fontSize={"sm"}
+          fontWeight={500}
+          leftIcon={<Icon as={navItem.icon} />}
+          color={"gray.600"}
+          _hover={{
+            textDecoration: "none",
+            color: "brand.500",
+            bg: "brand.50",
+          }}
+        >
+          {navItem.label}
+        </Button>
+      ))}
+    </Stack>
+  );
+};
+
+// MENU MOVIL
+const MobileNav = () => {
+  return (
+    <Stack
+      bg={"white"}
+      p={4}
+      display={{ md: "none" }}
+      borderTop="1px solid"
+      borderColor="gray.100"
+    >
+      {NAV_ITEMS.map((navItem) => (
+        <Flex
+          key={navItem.label}
+          py={2}
+          as={RouterLink}
+          to={navItem.href}
+          justify={"space-between"}
+          align={"center"}
+          _hover={{ textDecoration: "none" }}
+        >
+          <Flex align="center">
+            <Icon as={navItem.icon} color="brand.500" mr={3} />
+            <Text fontWeight={600} color="gray.600">
+              {navItem.label}
+            </Text>
+          </Flex>
+        </Flex>
+      ))}
+    </Stack>
+  );
+};
 
 export default Header;

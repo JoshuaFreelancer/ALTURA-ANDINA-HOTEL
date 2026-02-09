@@ -1,147 +1,139 @@
-import React from "react";
-import { Typography, TextField, Button, Divider } from "@mui/material";
-import Grid from '@mui/material/Grid';
-import { motion } from "framer-motion";
-import { NavLink } from 'react-router-dom';
-import MountainIcon from "@mui/icons-material/Terrain";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import React from 'react';
+import { 
+  Box, 
+  Container, 
+  SimpleGrid, 
+  Stack, 
+  Text, 
+  Input, 
+  Button, 
+  IconButton, 
+  Link, 
+  Flex,
+  Divider,
+  Icon,
+  Heading,
+  InputGroup,
+  InputRightElement
+} from '@chakra-ui/react';
+import { NavLink as RouterLink } from 'react-router-dom';
+import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaMountain, FaPaperPlane } from 'react-icons/fa';
 
-function Footer() {
-  // Función para manejar redirección a las redes sociales
-  const handleRedirect = (url) => {
-    window.open(url, "_blank");
-  };
+const SocialButton = ({ icon, href }) => (
+  <IconButton
+    as="a"
+    href={href}
+    target="_blank"
+    aria-label="Social Media"
+    icon={<Icon as={icon} w={5} h={5} />}
+    rounded="full"
+    bg="whiteAlpha.100"
+    color="white"
+    _hover={{
+      bg: 'brand.500',
+      color: 'white',
+      transform: 'translateY(-2px)'
+    }}
+    transition="all 0.3s"
+  />
+);
 
+const FooterLink = ({ to, children }) => (
+  <Link
+    as={RouterLink}
+    to={to}
+    color="gray.400"
+    _hover={{ color: 'brand.300', textDecoration: 'none' }}
+  >
+    {children}
+  </Link>
+);
+
+const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-white py-8">
-      <div className="container mx-auto px-4">
-        <Grid container spacing={4}>
-          {/* Columna del formulario */}
-          <Grid item xs={12} md={6}>
-            <Grid container spacing={2}>
-              {/* Logo */}
-              <Grid item xs={12}>
-                {/* Logo */}
-                <div className="flex items-center">
-                  <motion.div
-                    initial={{ scale: 1 }}
-                    whileHover={{ scale: 1.1 }}
-                    className="mb-4 md:mb-0"
-                  >
-                    <h2 className="text-2xl text-brand-500 font-playfair-display flex items-center cursor-pointer">
-                      <MountainIcon className="w-10 h-10 mr-2" />
-                      Altura Andina
-                    </h2>
-                  </motion.div>
-                </div>
-              </Grid>
-              {/* Título y campo de correo */}
-              <Grid item xs={12}>
-                <Typography variant="subtitle1" marginBottom="10px">
-                  Mantente activo con nuestras últimas actualizaciones
-                </Typography>
-                <Grid container spacing={2} alignItems="flex-end">
-                  <Grid item xs={9}>
-                    <TextField
-                      variant="outlined"
-                      fullWidth
-                      label="Correo electrónico"
-                      size="small"
-                      InputLabelProps={{ style: { color: "white" } }}
-                      InputProps={{ style: { color: "white" } }}
-                    />
-                  </Grid>
-                  <Grid item xs={3}>
-                    <Button variant="contained" color="primary" fullWidth>
-                      Suscribirse
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-          {/* Columna de enlaces */}
-          <Grid item xs={12} md={6}>
-            <Grid container spacing={2}>
-              {/* Enlaces */}
-              <Grid item xs={6}>
-                <Typography variant="h6">Navegación</Typography>
-                <Typography variant="body2">
-                  <NavLink to="/">Inicio</NavLink>
-                </Typography>
-                <Typography variant="body2">
-                  <NavLink to="/habitaciones">Habitaciones</NavLink>
-                </Typography>
-                <Typography variant="body2">
-                  <NavLink to="/servicios">Servicios</NavLink>
-                </Typography>
-                <Typography variant="body2">
-                  <NavLink to="/contacto">Contacto</NavLink>
-                </Typography>
-              </Grid>
-              {/* Direcciones */}
-              <Grid item xs={6}>
-                <Typography variant="h6">Direcciones</Typography>
-                <Typography variant="body2">Av. Principal, Mérida</Typography>
-                <Typography variant="body2">
-                  Callejón de los Suspiros, Mérida
-                </Typography>
-                <Typography variant="body2">
-                  Paseo de la Montaña, Mérida
-                </Typography>
-                <Typography variant="body2">
-                  Calle de los Pájaros, Mérida
-                </Typography>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-        {/* Barra separadora con margen top y bottom */}
-        <Divider
-          variant="middle"
-          className="my-8"
-          style={{
-            backgroundColor: "white",
-            marginTop: "2rem",
-            marginBottom: "2rem",
-          }}
-        />
-        {/* Texto de copyright y redes sociales con efecto de animación */}
-        <div className="flex justify-between items-center">
-          <Typography variant="body2">
-            &copy; 2024 Altura Andina Hotel & Spa. Todos los derechos
-            reservados.
-          </Typography>
-          <div className="flex space-x-4">
-            {/* Iconos de redes sociales con efecto de animación */}
-            <FacebookIcon
-              className="text-white cursor-pointer transition duration-300 transform hover:scale-110"
-              style={{ fontSize: 24 }}
-              onClick={() => handleRedirect("https://www.facebook.com")}
-            />
-            <TwitterIcon
-              className="text-white cursor-pointer transition duration-300 transform hover:scale-110"
-              style={{ fontSize: 24 }}
-              onClick={() => handleRedirect("https://twitter.com")}
-            />
-            <InstagramIcon
-              className="text-white cursor-pointer transition duration-300 transform hover:scale-110"
-              style={{ fontSize: 24 }}
-              onClick={() => handleRedirect("https://www.instagram.com")}
-            />
-            <LinkedInIcon
-              className="text-white cursor-pointer transition duration-300 transform hover:scale-110"
-              style={{ fontSize: 24 }}
-              onClick={() => handleRedirect("https://www.linkedin.com")}
-            />
-          </div>
-        </div>
-      </div>
-    </footer>
+    <Box bg="gray.900" color="white" py={12}>
+      <Container maxW="container.xl">
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={10}>
+          
+          {/* COLUMNA 1: MARCA */}
+          <Stack spacing={6}>
+            <Flex align="center">
+              <Icon as={FaMountain} w={8} h={8} color="brand.500" mr={2} />
+              <Heading size="md" fontFamily="heading">Altura Andina</Heading>
+            </Flex>
+            <Text color="gray.400" fontSize="sm">
+              Tu refugio de lujo en el corazón de los Andes venezolanos. 
+              Experiencias inolvidables, confort y naturaleza.
+            </Text>
+            <Stack direction="row" spacing={4}>
+              <SocialButton icon={FaFacebook} href="https://facebook.com" />
+              <SocialButton icon={FaTwitter} href="https://twitter.com" />
+              <SocialButton icon={FaInstagram} href="https://instagram.com" />
+              <SocialButton icon={FaLinkedin} href="https://linkedin.com" />
+            </Stack>
+          </Stack>
+
+          {/* COLUMNA 2: NAVEGACIÓN */}
+          <Stack align="flex-start">
+            <Heading size="sm" mb={2}>Navegación</Heading>
+            <FooterLink to="/">Inicio</FooterLink>
+            <FooterLink to="/habitaciones">Habitaciones</FooterLink>
+            <FooterLink to="/servicios">Servicios</FooterLink>
+            <FooterLink to="/contacto">Contacto</FooterLink>
+          </Stack>
+
+          {/* COLUMNA 3: DIRECCIÓN */}
+          <Stack align="flex-start">
+            <Heading size="sm" mb={2}>Encuéntranos</Heading>
+            <Text color="gray.400">Av. Principal, Mérida</Text>
+            <Text color="gray.400">Callejón de los Suspiros</Text>
+            <Text color="gray.400">Paseo de la Montaña</Text>
+            <Text color="gray.400" mt={2} fontWeight="bold">reservas@alturaandina.com</Text>
+          </Stack>
+
+          {/* COLUMNA 4: NEWSLETTER */}
+          <Stack spacing={4}>
+            <Heading size="sm" mb={2}>Newsletter</Heading>
+            <Text color="gray.400" fontSize="sm">
+              Suscríbete para recibir ofertas exclusivas y novedades.
+            </Text>
+            <InputGroup>
+              <Input 
+                placeholder="Tu correo electrónico" 
+                bg="whiteAlpha.100" 
+                border={0} 
+                _focus={{ bg: 'whiteAlpha.300' }}
+                color="white"
+              />
+              <InputRightElement width="3rem">
+                <IconButton 
+                  h="1.75rem" 
+                  size="sm" 
+                  colorScheme="brand" 
+                  bg="brand.500" 
+                  icon={<FaPaperPlane />} 
+                  aria-label="Subscribe"
+                />
+              </InputRightElement>
+            </InputGroup>
+          </Stack>
+
+        </SimpleGrid>
+
+        <Divider my={8} borderColor="gray.700" />
+
+        <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align="center">
+          <Text fontSize="sm" color="gray.500">
+            &copy; {new Date().getFullYear()} Altura Andina Hotel & Spa. Todos los derechos reservados.
+          </Text>
+          <Stack direction="row" spacing={4} mt={{ base: 4, md: 0 }}>
+             <Link href="#" fontSize="sm" color="gray.500">Privacidad</Link>
+             <Link href="#" fontSize="sm" color="gray.500">Términos</Link>
+          </Stack>
+        </Flex>
+      </Container>
+    </Box>
   );
-}
+};
 
 export default Footer;

@@ -1,106 +1,179 @@
 import React from 'react';
-import { Typography, Card, CardContent, CardHeader, Grid } from "@mui/material";
-// Usamos Link de Router para navegación interna y 'a' o MUI Link para externa
-import { Link } from "react-router-dom"; 
-import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
-import LocalMallIcon from "@mui/icons-material/LocalMall";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
-import EventIcon from "@mui/icons-material/Event";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { useSpring, animated } from "react-spring";
+import { 
+  Box, 
+  Heading, 
+  Text, 
+  SimpleGrid, 
+  Container,
+  Link,
+  List,
+  ListItem,
+  ListIcon,
+  Stack,
+  useColorModeValue,
+  Icon
+} from '@chakra-ui/react';
+import { motion } from 'framer-motion';
+import { 
+  FaExternalLinkAlt, 
+  FaSuitcase, 
+  FaCameraRetro, 
+  FaUtensils, 
+  FaCalendarAlt 
+} from 'react-icons/fa';
 
-function BlogSection() {
-  const animatedProps = useSpring({
-    to: { opacity: 1, transform: "translateY(0)" },
-    from: { opacity: 0, transform: "translateY(-50px)" },
-    config: { tension: 200, friction: 20 },
-  });
+// Creamos un Box animado para envolver las tarjetas
+const MotionBox = motion(Box);
+
+const BlogSection = () => {
+  const cardBg = useColorModeValue('white', 'gray.700');
+  const hoverShadow = useColorModeValue('xl', 'dark-lg');
+
+  // --- CONFIGURACIÓN DE ANIMACIÓN (Cascada) ---
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2 // Retraso de 0.2s entre cada hijo
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  };
 
   return (
-    <section id="blog-section" className="py-12">
-      <div className="container mx-auto px-4">
-        <Typography variant="h2" align="center" gutterBottom sx={{ mb: 4 }}>
+    <Box as="section" py={{ base: 12, md: 20 }} bg="gray.50" id="blog-section">
+      <Container maxW="container.xl">
+        <Heading 
+          as="h2" 
+          size="2xl" 
+          textAlign="center" 
+          mb={12} 
+          color="brand.600" 
+          fontFamily="heading"
+        >
           ¡Explora Mérida!
-        </Typography>
-        
-        {/* Grid Container V1 */}
-        <Grid container spacing={4}>
-          
-          {/* Item 1 */}
-          <Grid item xs={12} md={4}>
-            <animated.div style={animatedProps}>
-              <Card sx={{ height: '100%' }}>
-                <CardHeader title="Artículos de Turismo" />
-                <CardContent>
-                  <Typography variant="body1" gutterBottom>
-                    Descubre los mejores lugares para visitar en Mérida.
-                  </Typography>
-                  <a
-                    href="https://www.tripadvisor.com.ve/Attractions-g316050-Activities-Merida_Andean_Region.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ display: 'flex', alignItems: 'center', color: '#1976d2', textDecoration: 'none' }}
-                  >
-                    Ver más <OpenInNewIcon fontSize="small" sx={{ ml: 0.5 }} />
-                  </a>
-                </CardContent>
-              </Card>
-            </animated.div>
-          </Grid>
+        </Heading>
 
-          {/* Item 2 */}
-          <Grid item xs={12} md={4}>
-            <animated.div style={animatedProps}>
-              <Card sx={{ height: '100%' }}>
-                <CardHeader title="Consejos de Viaje" />
-                <CardContent>
-                  <Typography variant="body1" gutterBottom>
-                    Consejos útiles para tu viaje.
-                  </Typography>
-                  <ul style={{ listStyle: 'none', padding: 0 }}>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <FlightTakeoffIcon fontSize="small" /> Empaca ropa ligera.
-                    </li>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <LocalMallIcon fontSize="small" /> Cultura local.
-                    </li>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <RestaurantIcon fontSize="small" /> Comida típica.
-                    </li>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <EventIcon fontSize="small" /> Reserva actividades.
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </animated.div>
-          </Grid>
+        {/* Contenedor animado que orquesta la cascada */}
+        <MotionBox
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+        >
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8}>
+            
+            {/* --- CARD 1: ARTÍCULOS --- */}
+            <MotionBox 
+              variants={itemVariants} 
+              bg={cardBg} 
+              p={6} 
+              borderRadius="xl" 
+              boxShadow="lg" 
+              _hover={{ transform: 'translateY(-5px)', boxShadow: hoverShadow }} 
+              transition="all 0.3s"
+            >
+              <Stack spacing={4} h="100%" justify="space-between">
+                <Box>
+                  <Heading size="md" color="brand.500" mb={2}>Artículos de Turismo</Heading>
+                  <Text color="gray.600">
+                    Descubre los mejores lugares para visitar en Mérida, desde el teleférico más alto del mundo hasta los coloridos pueblos del páramo.
+                  </Text>
+                </Box>
+                <Link 
+                  href="https://www.tripadvisor.com.ve/Attractions-g316050-Activities-Merida_Andean_Region.html" 
+                  isExternal 
+                  color="blue.500" 
+                  fontWeight="bold"
+                  display="flex"
+                  alignItems="center"
+                  _hover={{ textDecoration: 'none', color: 'blue.600' }}
+                >
+                  Ver en TripAdvisor <Icon as={FaExternalLinkAlt} ml={2} w={3} h={3} />
+                </Link>
+              </Stack>
+            </MotionBox>
 
-          {/* Item 3 */}
-          <Grid item xs={12} md={4}>
-            <animated.div style={animatedProps}>
-              <Card sx={{ height: '100%' }}>
-                <CardHeader title="Guías Turísticas" />
-                <CardContent>
-                  <Typography variant="body1" gutterBottom>
-                    Explora nuestras guías completas.
-                  </Typography>
-                  <a
-                    href="https://www.venezuelatuya.com/andes/guia_turistica_de_merida.htm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ display: 'flex', alignItems: 'center', color: '#1976d2', textDecoration: 'none' }}
-                  >
-                    Ver más <OpenInNewIcon fontSize="small" sx={{ ml: 0.5 }} />
-                  </a>
-                </CardContent>
-              </Card>
-            </animated.div>
-          </Grid>
+            {/* --- CARD 2: CONSEJOS (Lista) --- */}
+            <MotionBox 
+              variants={itemVariants} 
+              bg={cardBg} 
+              p={6} 
+              borderRadius="xl" 
+              boxShadow="lg" 
+              _hover={{ transform: 'translateY(-5px)', boxShadow: hoverShadow }} 
+              transition="all 0.3s"
+            >
+              <Stack spacing={4}>
+                <Heading size="md" color="brand.500">Consejos de Viaje</Heading>
+                <Text color="gray.600" fontSize="sm">
+                  Tips esenciales de los locales para disfrutar tu estadía al máximo:
+                </Text>
+                <List spacing={3} color="gray.600">
+                  <ListItem display="flex" alignItems="center">
+                    <ListIcon as={FaSuitcase} color="brand.400" />
+                    Lleva abrigo y ropa cómoda.
+                  </ListItem>
+                  <ListItem display="flex" alignItems="center">
+                    <ListIcon as={FaCameraRetro} color="brand.400" />
+                    Respeta la cultura local.
+                  </ListItem>
+                  <ListItem display="flex" alignItems="center">
+                    <ListIcon as={FaUtensils} color="brand.400" />
+                    Prueba la gastronomía típica.
+                  </ListItem>
+                  <ListItem display="flex" alignItems="center">
+                    <ListIcon as={FaCalendarAlt} color="brand.400" />
+                    Reserva tours con tiempo.
+                  </ListItem>
+                </List>
+              </Stack>
+            </MotionBox>
 
-        </Grid>
-      </div>
-    </section>
+            {/* --- CARD 3: GUÍAS --- */}
+            <MotionBox 
+              variants={itemVariants} 
+              bg={cardBg} 
+              p={6} 
+              borderRadius="xl" 
+              boxShadow="lg" 
+              _hover={{ transform: 'translateY(-5px)', boxShadow: hoverShadow }} 
+              transition="all 0.3s"
+            >
+              <Stack spacing={4} h="100%" justify="space-between">
+                <Box>
+                  <Heading size="md" color="brand.500" mb={2}>Guías Turísticas</Heading>
+                  <Text color="gray.600">
+                    Accede a guías completas y actualizadas sobre rutas de senderismo, posadas históricas y eventos culturales en la región.
+                  </Text>
+                </Box>
+                <Link 
+                  href="https://www.venezuelatuya.com/andes/guia_turistica_de_merida.htm" 
+                  isExternal 
+                  color="blue.500" 
+                  fontWeight="bold"
+                  display="flex"
+                  alignItems="center"
+                  _hover={{ textDecoration: 'none', color: 'blue.600' }}
+                >
+                  Ver guía completa <Icon as={FaExternalLinkAlt} ml={2} w={3} h={3} />
+                </Link>
+              </Stack>
+            </MotionBox>
+
+          </SimpleGrid>
+        </MotionBox>
+      </Container>
+    </Box>
   );
 }
 

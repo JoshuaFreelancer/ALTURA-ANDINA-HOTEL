@@ -1,7 +1,17 @@
 import React from "react";
-import { Typography, Card, CardContent, CardMedia } from "@mui/material";
-import Grid from '@mui/material/Grid';
-import { useSpring, animated } from "react-spring";
+import {
+  Box,
+  Heading,
+  Text,
+  SimpleGrid,
+  Image,
+  Container,
+  Stack,
+  Icon,
+  useColorModeValue,
+  Flex
+} from "@chakra-ui/react";
+import { motion } from "framer-motion";
 import {
   MdRestaurant,
   MdHotTub,
@@ -11,89 +21,156 @@ import {
   MdBusiness,
 } from "react-icons/md";
 
-function ServicesSection() {
-  const flipProps = useSpring({
-    from: { transform: "perspective(600px) rotateX(180deg)", opacity: 0 },
-    to: { transform: "perspective(600px) rotateX(0deg)", opacity: 1 },
-    config: { mass: 15, tension: 500, friction: 100 },
-  });
+// Componente animado envoltorio
+const MotionBox = motion(Box);
+
+const ServicesSection = () => {
+  // Colores del tema
+  const bgCard = useColorModeValue("white", "gray.700");
+  const iconColor = "brand.500"; // Usamos tu color de marca
+  const hoverShadow = "2xl";
+
+  // --- DATOS DE SERVICIOS ---
+  const services = [
+    {
+      title: "Restaurante Gourmet",
+      description: "Disfruta de exquisitos platos andinos e internacionales preparados por chefs expertos.",
+      icon: MdRestaurant, // Pasamos la referencia del componente, no el elemento < />
+      image: "/assets/images/Restaurante.jpeg",
+    },
+    {
+      title: "Spa de Lujo",
+      description: "Relájate y rejuvenece tu cuerpo con masajes y tratamientos en nuestro exclusivo spa.",
+      icon: MdHotTub,
+      image: "/assets/images/Spa.jpeg",
+    },
+    {
+      title: "Wi-Fi de Alta Velocidad",
+      description: "Mantente conectado siempre con nuestro rápido y confiable servicio de fibra óptica.",
+      icon: MdWifi,
+      image: "/assets/images/Wifi.jpeg",
+    },
+    {
+      title: "Excursiones de Montaña",
+      description: "Explora los majestuosos picos de Mérida y sube al Pico Bolívar con guías certificados.",
+      icon: MdDirectionsWalk,
+      image: "/assets/images/Montaña.jpeg",
+    },
+    {
+      title: "Actividades Recreativas",
+      description: "Disfruta de caminatas, paseos a caballo y una amplia gama de actividades al aire libre.",
+      icon: MdLocalActivity,
+      image: "/assets/images/Recreacion.jpg",
+    },
+    {
+      title: "Salas de Reuniones",
+      description: "Organiza conferencias y eventos corporativos en nuestras modernas salas equipadas.",
+      icon: MdBusiness,
+      image: "/assets/images/Reuniones.jpg",
+    },
+  ];
+
+  // --- CONFIGURACIÓN DE ANIMACIÓN (Stagger/Cascada) ---
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15 // Cada tarjeta aparece 0.15s después de la anterior
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 }, // Empieza un poco abajo e invisible
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
+  };
 
   return (
-    <section id="services">
-      <Typography variant="h2" align="center" gutterBottom>
-        Nuestros Servicios
-      </Typography>
-      <Grid container spacing={4}>
-        {services.map((service, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <animated.div style={flipProps}>
-              <Card>
-                <CardMedia
-                  component="img"
-                  style={{ height: '150px', objectFit: 'cover' }}
-                  image={service.image || "/images/placeholder.jpg"}
-                  alt={`Servicio ${index + 1}`}
-                />
+    <Box as="section" py={{ base: 12, md: 20 }} bg="gray.50" id="servicios">
+      <Container maxW="container.xl">
+        <Heading
+          as="h2"
+          size="2xl"
+          textAlign="center"
+          mb={12}
+          color="brand.600"
+          fontFamily="heading"
+        >
+          Nuestros Servicios
+        </Heading>
 
-                <CardContent>
-                  <Typography variant="h5" component="h2" gutterBottom>
-                    {service.title}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" paragraph>
+        {/* Contenedor del Grid Animado */}
+        <MotionBox
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }} // Se anima cuando el 10% es visible
+        >
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={10}>
+            {services.map((service, index) => (
+              <MotionBox
+                key={index}
+                variants={itemVariants}
+                bg={bgCard}
+                borderRadius="xl"
+                overflow="hidden"
+                boxShadow="lg"
+                transition="all 0.3s"
+                _hover={{ 
+                  transform: "translateY(-8px)", // Se eleva al pasar el mouse
+                  boxShadow: hoverShadow 
+                }}
+                position="relative"
+              >
+                {/* Imagen del Servicio */}
+                <Box h="200px" overflow="hidden">
+                  <Image
+                    src={service.image}
+                    alt={service.title}
+                    w="100%"
+                    h="100%"
+                    objectFit="cover"
+                    transition="transform 0.5s"
+                    _hover={{ transform: "scale(1.1)" }} // Zoom suave en la imagen
+                  />
+                </Box>
+
+                {/* Contenido */}
+                <Stack p={6} spacing={3}>
+                  {/* Icono flotante o en línea */}
+                  <Flex align="center">
+                    <Flex 
+                      w={10} 
+                      h={10} 
+                      align="center" 
+                      justify="center" 
+                      bg="brand.100" 
+                      borderRadius="full" 
+                      mr={3}
+                    >
+                      <Icon as={service.icon} w={5} h={5} color={iconColor} />
+                    </Flex>
+                    <Heading size="md" fontFamily="body" color="brand.600">
+                      {service.title}
+                    </Heading>
+                  </Flex>
+
+                  <Text color="gray.600" fontSize="sm" noOfLines={3}>
                     {service.description}
-                  </Typography>
-                  {service.icon}
-                </CardContent>
-              </Card>
-            </animated.div>
-          </Grid>
-        ))}
-      </Grid>
-    </section>
+                  </Text>
+                </Stack>
+              </MotionBox>
+            ))}
+          </SimpleGrid>
+        </MotionBox>
+      </Container>
+    </Box>
   );
-}
-
-const services = [
-  {
-    title: "Restaurante Gourmet",
-    description: "Disfruta de exquisitos platos preparados por chefs expertos.",
-    icon: <MdRestaurant />,
-    image: "assets/images/Restaurante.jpeg",
-  },
-  {
-    title: "Spa de Lujo",
-    description: "Relájate y rejuvenece tu cuerpo en nuestro lujoso spa.",
-    icon: <MdHotTub />,
-    image: "assets/images/Spa.jpeg",
-  },
-  {
-    title: "Wi-Fi de Alta Velocidad",
-    description:
-      "Mantente conectado con nuestro rápido y confiable servicio de Wi-Fi 5G.",
-    icon: <MdWifi />,
-    image: "assets/images/Wifi.jpeg",
-  },
-  {
-    title: "Excursiones de Montañismo",
-    description:
-      "Explora las majestuosas montañas de Mérida y sube el pico del avila con guías de expertos.",
-    icon: <MdDirectionsWalk />,
-    image: "assets/images/Montaña.jpeg",
-  },
-  {
-    title: "Actividades Recreativas",
-    description:
-      "Disfruta de una amplia gama de actividades recreativas en nuestro maravilloso hotel.",
-    icon: <MdLocalActivity />,
-    image: "assets/images/Recreacion.jpg",
-  },
-  {
-    title: "Salas de Reuniones",
-    description:
-      "Organiza reuniones y eventos en nuestras modernas y equipadas salas.",
-    icon: <MdBusiness />,
-    image: "assets/images/Reuniones.jpg",
-  },
-];
+};
 
 export default ServicesSection;

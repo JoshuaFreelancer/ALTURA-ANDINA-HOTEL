@@ -1,47 +1,64 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import hotelApi from '../services/api'; // Importamos tu instancia configurada
 
-// Creamos el contexto de las habitaciones
 const HabitacionesContext = createContext();
 
-// Hook personalizado para acceder al contexto de las habitaciones
-export const useHabitaciones = () => useContext(HabitacionesContext);
+export const useHabitaciones = () => {
+  const context = useContext(HabitacionesContext);
+  if (!context) {
+    throw new Error("useHabitaciones debe usarse dentro de un HabitacionesProvider");
+  }
+  return context;
+};
 
-// Proveedor del contexto de las habitaciones
 export const HabitacionesProvider = ({ children }) => {
-  const [habitaciones, setHabitaciones] = useState([]);
+  // 1. ESTADO "MAESTRO" (La fuente de la verdad, nunca se borra)
+  const [allHabitaciones, setAllHabitaciones] = useState([]);
+  
+  // 2. ESTADO "VISTA" (Lo que se muestra en pantalla, puede filtrarse)
+  const [filteredHabitaciones, setFilteredHabitaciones] = useState([]);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Función para cargar las habitaciones desde el servidor
     const cargarHabitaciones = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/habitaciones');
-        setHabitaciones(response.data);
-      } catch (error) {
-        setError(error.message);
+        setLoading(true);
+        // Usamos '/rooms' porque la baseURL ya es '.../api'
+        // Esto asume que tu backend tiene la ruta router.get('/', ...) en roomRoutes
+        const { data } = await hotelApi.get('/rooms'); 
+        
+        setAllHabitaciones(data);      // Guardamos la copia original
+        setFilteredHabitaciones(data); // Inicialmente mostramos todo
+        
+      } catch (err) {
+        console.error("Error cargando habitaciones:", err);
+        setError(err.message || "No se pudieron cargar las habitaciones.");
       } finally {
         setLoading(false);
       }
     };
 
-    // Cargar las habitaciones al montar el componente
     cargarHabitaciones();
-
-    // Retornar una función para limpiar el estado al desmontar el componente
-    return () => {
-      // No necesitamos limpiar el estado aquí, ya que las habitaciones se actualizarán automáticamente cuando sea necesario
-    };
   }, []);
 
-  const setFilteredHabitaciones = (filteredHabitaciones) => {
-    setHabitaciones(filteredHabitaciones);
+  // Función auxiliar para reiniciar filtros fácilmente
+  const resetFilters = () => {
+    setFilteredHabitaciones(allHabitaciones);
   };
 
-  // Retornar el proveedor del contexto de las habitaciones
   return (
-    <HabitacionesContext.Provider value={{ habitaciones, loading, error, setFilteredHabitaciones }}>
+    <HabitacionesContext.Provider 
+      value={{ 
+        habitaciones: allHabitaciones, // Exportamos la lista COMPLETA para que el filtro sepa dónde buscar
+        filteredHabitaciones,          // Exportamos la lista FILTRADA para renderizar
+        setFilteredHabitaciones,       // Función para actualizar la vista
+        resetFilters,
+        loading, 
+        error 
+      }}
+    >
       {children}
     </HabitacionesContext.Provider>
   );

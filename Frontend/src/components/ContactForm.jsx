@@ -1,94 +1,156 @@
-import React, { useState } from "react";
-import SpecialPromotions from "./SpecialPromotions.jsx";
+import { useState, useEffect } from "react";
 import {
-  Typography,
-  Card,
-  CardContent,
-  TextField,
+  Box,
   Button,
+  Container,
   FormControl,
   FormLabel,
+  Heading,
   Input,
-  MenuItem,
   Select,
-  Snackbar,
-} from "@mui/material";
-import Grid from '@mui/material/Grid';
-import { PeopleAlt, Hotel, Send } from "@mui/icons-material";
+  Stack,
+  Textarea,
+  SimpleGrid,
+  useToast,
+  VStack,
+  HStack,
+  Icon,
+  InputGroup,
+  InputLeftElement,
+  useColorModeValue,
+  Card,
+  CardBody,
+  Text, // <--- ¡AQUÍ FALTABA ESTE IMPORT!
+} from "@chakra-ui/react";
+import {
+  FaUser,
+  FaEnvelope,
+  FaPaperPlane,
+  FaCalendarAlt,
+  FaChild,
+  FaBed,
+} from "react-icons/fa";
 import { useData } from "../hooks/DataContext.jsx";
-import { useSpring, animated } from "react-spring";
+import SpecialPromotions from "./SpecialPromotions.jsx";
 import axios from "axios";
-import hotelLogo from "../../public/assets/images/icon.png";
+
+// Logo (Asegúrate de que la ruta sea correcta)
+import hotelLogo from "/assets/images/icon.png";
 
 function ContactForm() {
-  const { reservationData } = useData();
+  const { reservationData, resetReservation } = useData();
+  const toast = useToast();
+
+  // Colores del tema
+  const bgCard = useColorModeValue("white", "gray.700");
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
-    checkIn: reservationData.checkIn || "",
-    checkOut: reservationData.checkOut || "",
-    adults: reservationData.adults || 1,
-    kids: reservationData.kids || 0,
-    rooms: reservationData.rooms || 1,
+    checkIn: "",
+    checkOut: "",
+    adults: 1,
+    kids: 0,
+    rooms: 1,
   });
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isFormDisabled, setIsFormDisabled] = useState(false); // Estado para deshabilitar el formulario después de enviar
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // EFECTO: Cargar datos del contexto al iniciar
+  useEffect(() => {
+    if (reservationData.checkIn) {
+      setFormData((prev) => ({
+        ...prev,
+        checkIn: reservationData.checkIn,
+        checkOut: reservationData.checkOut,
+        adults: reservationData.adults,
+        kids: reservationData.kids,
+        rooms: reservationData.rooms,
+      }));
+    }
+  }, [reservationData]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validación simple
     if (
       !formData.name ||
       !formData.email ||
       !formData.checkIn ||
-      !formData.checkOut ||
-      !formData.adults ||
-      formData.checkOut <= formData.checkIn // Validación de fechas
+      !formData.checkOut
     ) {
-      setErrorMessage("Todos los campos obligatorios deben completarse y las fechas deben ser válidas.");
-      setShowErrorMessage(true);
+      toast({
+        title: "Error",
+        description: "Por favor completa todos los campos obligatorios.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
       return;
     }
 
-    const cartaReserva = `
-  <div style="font-family: 'Lato', sans-serif; max-width: 600px; margin: 0 auto;">
-    <img src="${hotelLogo}" alt="Hotel Logo" style="display: block; margin: 0 auto; width: 200px;">
-    <h2 style="text-align: center; margin-top: 20px;">Confirmación de reserva</h2>
-    <p>Estimado/a ${formData.name},</p>
-    <p>¡Gracias por tu reserva en nuestro hotel!</p>
-    <p>A continuación, te detallamos la información de tu reserva:</p>
-    <ul>
-      <li>Fecha de entrada: ${formData.checkIn}</li>
-      <li>Fecha de salida: ${formData.checkOut}</li>
-      <li>Número de adultos: ${formData.adults}</li>
-      <li>Número de niños: ${formData.kids}</li>
-      <li>Número de habitaciones: ${formData.rooms}</li>
-    </ul>
-    <p>Esperamos que disfrutes de tu estadía con nosotros.</p>
-    <p>Atentamente, Altura Andina Hotel & Spa</p>
-    <p>El equipo de nuestro hotel</p>
-  </div>
-`;
-
-    // Enviar el correo electrónico con los datos del formulario
-    try {
-      setIsFormDisabled(true); // Deshabilitar el formulario mientras se envía
-      await axios.post("http://localhost:5000/send-email", {
-        // Cambia la URL a tu endpoint de Node.js
-        email: formData.email,
-        subject: "Confirmación de reserva",
-        text: "¡Gracias por reservar en nuestro hotel!",
-        html: cartaReserva,
+    if (formData.checkOut <= formData.checkIn) {
+      toast({
+        title: "Fechas inválidas",
+        description: "La fecha de salida debe ser posterior a la entrada.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
       });
-      setShowSuccessMessage(true);
-      setFormData({ // Limpiar el formulario después de enviar
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Construcción del HTML para el correo (Template String)
+    const emailHtml = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+        <div style="text-align: center;">
+             <img src="${hotelLogo}" alt="Altura Andina" style="width: 100px; margin-bottom: 20px;">
+        </div>
+        <h2 style="color: #2c5282; text-align: center;">Confirmación de Solicitud</h2>
+        <p>Hola <strong>${formData.name}</strong>,</p>
+        <p>Hemos recibido tu solicitud de reserva. Nuestro equipo verificará la disponibilidad y te contactará pronto.</p>
+        
+        <div style="background-color: #f7fafc; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <h3 style="margin-top: 0;">Detalles de la Reserva:</h3>
+          <ul style="list-style: none; padding: 0;">
+            <li><strong>Entrada:</strong> ${formData.checkIn}</li>
+            <li><strong>Salida:</strong> ${formData.checkOut}</li>
+            <li><strong>Adultos:</strong> ${formData.adults} | <strong>Niños:</strong> ${formData.kids}</li>
+            <li><strong>Habitaciones:</strong> ${formData.rooms}</li>
+          </ul>
+        </div>
+        
+        <p style="font-size: 0.9em; color: #718096;">Este es un correo automático. Por favor no respondas a esta dirección.</p>
+      </div>
+    `;
+
+    try {
+      await axios.post("http://localhost:5000/send-email", {
+        email: formData.email,
+        subject: "Solicitud de Reserva - Altura Andina",
+        html: emailHtml,
+      });
+
+      toast({
+        title: "¡Solicitud enviada!",
+        description:
+          "Te hemos enviado un correo de confirmación. Revisa tu bandeja.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+
+      // Limpiar formulario y contexto
+      setFormData({
         name: "",
         email: "",
         message: "",
@@ -98,177 +160,204 @@ function ContactForm() {
         kids: 0,
         rooms: 1,
       });
+      resetReservation(); // Función nueva del contexto
     } catch (error) {
-      console.error("Error al enviar el correo electrónico:", error);
-      setErrorMessage(
-        "Error al enviar el correo electrónico. Inténtalo de nuevo más tarde."
-      );
-      setShowErrorMessage(true);
+      console.error("Error envío:", error);
+      toast({
+        title: "Error al enviar",
+        description: "Hubo un problema con el servidor. Intenta nuevamente.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
     } finally {
-      setIsFormDisabled(false); // Habilitar el formulario después de enviar
+      setIsSubmitting(false);
     }
   };
 
-  const formAnimation = useSpring({
-    from: { opacity: 0, transform: "scale(0.5)" },
-    to: { opacity: 1, transform: "scale(1)" },
-    config: { tension: 40, friction: 10, bounce: true },
-  });
-
   return (
-    <section id="contact-form" className="bg-gray-100 py-12">
-      <animated.div style={{ ...formAnimation }} className="container mx-auto">
-        <Typography variant="h2" align="center" gutterBottom>
-          Reserva ahora
-        </Typography>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <form onSubmit={handleSubmit} disabled={isFormDisabled}>
-                  <Typography variant="h5" component="h2" gutterBottom>
-                    Completa el formulario
-                  </Typography>
-                  <TextField
-                    label="Nombre"
-                    variant="outlined"
-                    fullWidth
-                    margin="normal"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                  />
-                  <TextField
-                    label="Correo Electrónico"
-                    variant="outlined"
-                    fullWidth
-                    margin="normal"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                  />
-                  <TextField
-                    label="Mensaje (Opcional)"
-                    variant="outlined"
-                    fullWidth
-                    multiline
-                    rows={4}
-                    margin="normal"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                  />
-                  <FormControl style={{ margin: "0.8rem" }}>
-                    <FormLabel htmlFor="check-in">Entrada</FormLabel>
+    <Box py={{ base: 12, md: 20 }} bg="gray.100" id="contacto">
+      <Container maxW="container.xl">
+        <Heading
+          as="h2"
+          size="2xl"
+          textAlign="center"
+          mb={12}
+          color="brand.600"
+          fontFamily="heading"
+        >
+          Reserva tu Estadía
+        </Heading>
+
+        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={10}>
+          {/* COLUMNA IZQUIERDA: FORMULARIO */}
+          <Card bg={bgCard} shadow="xl" borderRadius="xl">
+            <CardBody p={{ base: 6, md: 8 }}>
+              <VStack as="form" spacing={5} onSubmit={handleSubmit}>
+                <Heading size="md" alignSelf="start" color="brand.500" mb={2}>
+                  Datos del Huésped
+                </Heading>
+
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} w="100%">
+                  <FormControl isRequired>
+                    <FormLabel>Nombre Completo</FormLabel>
+                    <InputGroup>
+                      <InputLeftElement
+                        children={<Icon as={FaUser} color="gray.400" />}
+                      />
+                      <Input
+                        name="name"
+                        placeholder="Tu nombre"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                      />
+                    </InputGroup>
+                  </FormControl>
+
+                  <FormControl isRequired>
+                    <FormLabel>Correo Electrónico</FormLabel>
+                    <InputGroup>
+                      <InputLeftElement
+                        children={<Icon as={FaEnvelope} color="gray.400" />}
+                      />
+                      <Input
+                        name="email"
+                        type="email"
+                        placeholder="tucorreo@ejemplo.com"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                      />
+                    </InputGroup>
+                  </FormControl>
+                </SimpleGrid>
+
+                {/* FECHAS */}
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} w="100%">
+                  <FormControl isRequired>
+                    <FormLabel>Check-In</FormLabel>
                     <Input
-                      id="check-in"
                       type="date"
-                      size="small"
                       name="checkIn"
                       value={formData.checkIn}
                       onChange={handleInputChange}
                     />
                   </FormControl>
-                  <FormControl style={{ margin: "0.8rem" }}>
-                    <FormLabel htmlFor="check-out">Salida</FormLabel>
+                  <FormControl isRequired>
+                    <FormLabel>Check-Out</FormLabel>
                     <Input
-                      id="check-out"
                       type="date"
-                      size="small"
                       name="checkOut"
                       value={formData.checkOut}
                       onChange={handleInputChange}
                     />
                   </FormControl>
-                  <FormControl style={{ margin: "0.8rem" }}>
-                    <FormLabel htmlFor="adults">Adultos</FormLabel>
+                </SimpleGrid>
+
+                {/* SELECTORES DE PERSONAS */}
+                <HStack w="100%" spacing={4}>
+                  <FormControl>
+                    <FormLabel fontSize="sm">Adultos</FormLabel>
                     <Select
-                      id="adults"
-                      size="small"
-                      defaultValue={1}
                       name="adults"
                       value={formData.adults}
                       onChange={handleInputChange}
-                      startAdornment={<PeopleAlt />}
                     >
-                      {[...Array(8).keys()].map((num) => (
-                        <MenuItem key={num + 1} value={num + 1}>
-                          {num + 1} Adultos
-                        </MenuItem>
+                      {[...Array(8).keys()].map((i) => (
+                        <option key={i} value={i + 1}>
+                          {i + 1}
+                        </option>
                       ))}
                     </Select>
                   </FormControl>
-                  <FormControl style={{ margin: "0.8rem" }}>
-                    <FormLabel htmlFor="kids">Niños</FormLabel>
+                  <FormControl>
+                    <FormLabel fontSize="sm">Niños</FormLabel>
                     <Select
-                      id="kids"
-                      size="small"
-                      defaultValue={0}
                       name="kids"
                       value={formData.kids}
                       onChange={handleInputChange}
-                      startAdornment={<PeopleAlt />}
                     >
-                      {[...Array(8).keys()].map((num) => (
-                        <MenuItem key={num} value={num}>
-                          {num} Niños
-                        </MenuItem>
+                      {[...Array(6).keys()].map((i) => (
+                        <option key={i} value={i}>
+                          {i}
+                        </option>
                       ))}
                     </Select>
                   </FormControl>
-                  <FormControl style={{ margin: "0.8rem" }}>
-                    <FormLabel htmlFor="rooms">Habitaciones</FormLabel>
+                  <FormControl>
+                    <FormLabel fontSize="sm">Habitaciones</FormLabel>
                     <Select
-                      id="rooms"
-                      size="small"
-                      defaultValue={1}
                       name="rooms"
                       value={formData.rooms}
                       onChange={handleInputChange}
-                      startAdornment={<Hotel />}
                     >
-                      {[...Array(8).keys()].map((num) => (
-                        <MenuItem key={num + 1} value={num + 1}>
-                          {num + 1} Habitaciones
-                        </MenuItem>
+                      {[...Array(5).keys()].map((i) => (
+                        <option key={i} value={i + 1}>
+                          {i + 1}
+                        </option>
                       ))}
                     </Select>
                   </FormControl>
-                  <Grid container justifyContent="center">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      endIcon={<Send />}
-                      disabled={isFormDisabled} // Deshabilitar el botón de enviar mientras se envía
-                    >
-                      Enviar
-                    </Button>
-                  </Grid>
-                </form>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={6}>
+                </HStack>
+
+                <FormControl>
+                  <FormLabel>Mensaje Especial (Opcional)</FormLabel>
+                  <Textarea
+                    name="message"
+                    placeholder="¿Alguna petición especial?"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    rows={3}
+                  />
+                </FormControl>
+
+                <Button
+                  type="submit"
+                  colorScheme="brand"
+                  bg="brand.500"
+                  size="lg"
+                  w="full"
+                  mt={4}
+                  isLoading={isSubmitting}
+                  loadingText="Enviando..."
+                  rightIcon={<FaPaperPlane />}
+                  _hover={{
+                    bg: "brand.600",
+                    transform: "translateY(-2px)",
+                    shadow: "lg",
+                  }}
+                >
+                  Confirmar Solicitud
+                </Button>
+              </VStack>
+            </CardBody>
+          </Card>
+
+          {/* COLUMNA DERECHA: PROMOCIONES */}
+          <Box>
             <SpecialPromotions />
-          </Grid>
-        </Grid>
-      </animated.div>
-      {/* Alerta de éxito */}
-      <Snackbar
-        open={showSuccessMessage}
-        autoHideDuration={6000}
-        onClose={() => setShowSuccessMessage(false)}
-        message="Datos enviados correctamente"
-      />
-      {/* Alerta de error */}
-      <Snackbar
-        open={showErrorMessage}
-        autoHideDuration={6000}
-        onClose={() => setShowErrorMessage(false)}
-        message={errorMessage}
-      />
-    </section>
+
+            {/* Información de contacto extra */}
+            <Box
+              mt={8}
+              p={6}
+              bg="brand.600"
+              borderRadius="xl"
+              color="white"
+              shadow="lg"
+            >
+              <Heading size="md" mb={4}>
+                ¿Necesitas ayuda inmediata?
+              </Heading>
+              <Stack spacing={3}>
+                <Text>📞 +58 274 555 1234</Text>
+                <Text>📧 reservas@alturaandina.com</Text>
+                <Text>📍 Av. Principal, Mérida, Venezuela</Text>
+              </Stack>
+            </Box>
+          </Box>
+        </SimpleGrid>
+      </Container>
+    </Box>
   );
 }
 

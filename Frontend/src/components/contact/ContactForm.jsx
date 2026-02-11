@@ -20,22 +20,31 @@ import {
   Card,
   CardBody,
   Text,
+  useDisclosure, // Importamos esto para manejar el Modal
+  Divider,
 } from "@chakra-ui/react";
 import {
   FaUser,
   FaEnvelope,
-  FaPaperPlane,
   FaCalendarAlt,
+  FaCreditCard, // Icono para el pago
+  FaHotel, // Icono para pago en hotel
 } from "react-icons/fa";
 
 // --- IMPORTS ---
 import { useData } from "../../hooks/useData";
 import hotelApi from "../../services/api";
 import SpecialPromotions from "./Promotions.jsx";
+// Importamos el Modal de Pago que creamos anteriormente
+// Ajusta la ruta si guardaste el archivo en otro lado
+import PaymentModal from "../payment/PaymentModal";
 
 function ContactForm() {
   const { reservationData, resetReservation } = useData();
   const toast = useToast();
+
+  // Hook para controlar el Modal de Stripe
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const bgCard = useColorModeValue("white", "gray.700");
 
@@ -52,7 +61,6 @@ function ContactForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Cargar datos del contexto si vienen de la barra de reserva
   useEffect(() => {
     if (reservationData.checkIn) {
       setFormData((prev) => ({
@@ -71,10 +79,8 @@ function ContactForm() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // 1. Validaciones Básicas
+  // --- FUNCIÓN DE VALIDACIÓN (Para no repetir código) ---
+  const validateForm = () => {
     if (
       !formData.name ||
       !formData.email ||
@@ -83,14 +89,14 @@ function ContactForm() {
     ) {
       toast({
         title: "Campos incompletos",
-        description: "Por favor llena los campos obligatorios.",
+        description:
+          "Por favor completa los datos obligatorios antes de continuar.",
         status: "warning",
         duration: 3000,
         isClosable: true,
       });
-      return;
+      return false;
     }
-
     if (formData.checkOut <= formData.checkIn) {
       toast({
         title: "Fechas inválidas",
@@ -99,56 +105,72 @@ function ContactForm() {
         duration: 3000,
         isClosable: true,
       });
-      return;
+      return false;
     }
+    return true;
+  };
+
+  // --- OPCIÓN A: PAGO EN HOTEL (Solo Email) ---
+  const handlePayAtHotel = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
 
     try {
-      // 2. ENVÍO AL BACKEND (Sin HTML sucio)
-      // Enviamos solo los datos. El backend usará el template 'emailTemplate.js'
-      await hotelApi.post("/services/email", {
-        email: formData.email,
-        subject: `Nueva Solicitud de Reserva: ${formData.name}`,
-        // Datos desglosados para el template:
-        name: formData.name,
-        checkIn: formData.checkIn,
-        checkOut: formData.checkOut,
-        adults: formData.adults,
-        kids: formData.kids,
-        rooms: formData.rooms,
-        message: formData.message,
-      });
+      await sendConfirmationEmail("Nueva Solicitud (Pago en Hotel)");
 
-      // 3. Éxito
       toast({
         title: "¡Solicitud Enviada!",
-        description: "Revisa tu bandeja de entrada para ver los detalles.",
+        description: "Tu reserva está pre-confirmada. Pagarás al llegar.",
         status: "success",
         duration: 5000,
         isClosable: true,
         position: "top",
       });
 
-      // Resetear formulario
-      setFormData({
-        name: "",
-        email: "",
-        message: "",
-        checkIn: "",
-        checkOut: "",
-        adults: 1,
-        kids: 0,
-        rooms: 1,
-      });
-      resetReservation();
+      handleReset();
     } catch (error) {
-      console.error("Error envío:", error);
+      handleError(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // --- OPCIÓN B: PAGAR AHORA (Abre Modal Stripe) ---
+  const handleOpenPayment = () => {
+    if (validateForm()) {
+      onOpen(); // Abrimos el modal solo si el formulario está válido
+    }
+  };
+
+  // --- CALLBACK: Cuando Stripe confirma el pago ---
+  const handlePaymentSuccess = async () => {
+    onClose(); // Cerramos modal
+    setIsSubmitting(true); // Ponemos loading mientras mandamos el correo
+
+    try {
+      // Enviamos correo con asunto diferente
+      await sendConfirmationEmail("¡Reserva Confirmada y PAGADA! ✅");
+
       toast({
-        title: "Error de conexión",
-        description: "No pudimos enviar la solicitud. Verifica tu conexión.",
-        status: "error",
-        duration: 4000,
+        title: "¡Pago Exitoso!",
+        description: "Hemos recibido tu pago. Tu habitación está asegurada.",
+        status: "success",
+        duration: 6000,
+        isClosable: true,
+        position: "top",
+      });
+
+      handleReset();
+    } catch (error) {
+      // Si el pago pasó pero el correo falló, avisamos
+      console.error(error);
+      toast({
+        title: "Pago recibido, pero hubo un error con el correo",
+        description: "Por favor guarda tu comprobante de Stripe.",
+        status: "warning",
+        duration: 5000,
         isClosable: true,
       });
     } finally {
@@ -156,9 +178,50 @@ function ContactForm() {
     }
   };
 
+  // --- UTILIDAD: Enviar Correo ---
+  const sendConfirmationEmail = async (subjectLine) => {
+    await hotelApi.post("/services/email", {
+      email: formData.email,
+      subject: `${subjectLine} - ${formData.name}`,
+      name: formData.name,
+      checkIn: formData.checkIn,
+      checkOut: formData.checkOut,
+      adults: formData.adults,
+      kids: formData.kids,
+      rooms: formData.rooms,
+      message: formData.message,
+    });
+  };
+
+  const handleReset = () => {
+    setFormData({
+      name: "",
+      email: "",
+      message: "",
+      checkIn: "",
+      checkOut: "",
+      adults: 1,
+      kids: 0,
+      rooms: 1,
+    });
+    resetReservation();
+  };
+
+  const handleError = (error) => {
+    console.error("Error envío:", error);
+    toast({
+      title: "Error de conexión",
+      description: "Intenta nuevamente.",
+      status: "error",
+      duration: 4000,
+      isClosable: true,
+    });
+  };
+
   return (
     <Box py={{ base: 12 }} bg="gray.50" id="contacto">
       <Container maxW="container.xl">
+        {/* ... Header del formulario (igual) ... */}
         <VStack spacing={2} mb={12} textAlign="center">
           <Text
             color="brand.500"
@@ -173,8 +236,8 @@ function ContactForm() {
             Reserva tu Estadía
           </Heading>
           <Text fontSize="lg" color="gray.500" maxW="2xl">
-            Completa el formulario y nos pondremos en contacto contigo para
-            confirmar tu reserva.
+            Elige tu método de preferencia: asegura tu reserva pagando ahora o
+            solicita pagar en recepción.
           </Text>
         </VStack>
 
@@ -183,13 +246,14 @@ function ContactForm() {
           spacing={10}
           alignItems="start"
         >
-          {/* --- COLUMNA IZQUIERDA: FORMULARIO (Ocupa 2 espacios) --- */}
           <Box gridColumn={{ lg: "span 2" }}>
             <Card bg={bgCard} shadow="xl" borderRadius="xl" overflow="hidden">
               <Box h="6px" bgGradient="linear(to-r, brand.400, brand.600)" />
               <CardBody p={{ base: 6, md: 10 }}>
-                <VStack as="form" spacing={6} onSubmit={handleSubmit}>
-                  {/* SECCIÓN 1: DATOS PERSONALES */}
+                <VStack as="form" spacing={6}>
+                  {/* ... (Tus inputs de Información Personal y Detalles del Viaje se mantienen IGUAL) ... */}
+                  {/* ... Solo copiamos la estructura para ahorrar espacio, asumo que están aquí ... */}
+
                   <Heading
                     size="sm"
                     alignSelf="start"
@@ -201,7 +265,6 @@ function ContactForm() {
                   >
                     Información Personal
                   </Heading>
-
                   <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
                     <FormControl isRequired>
                       <FormLabel fontSize="sm" fontWeight="bold">
@@ -220,7 +283,6 @@ function ContactForm() {
                         />
                       </InputGroup>
                     </FormControl>
-
                     <FormControl isRequired>
                       <FormLabel fontSize="sm" fontWeight="bold">
                         Correo Electrónico
@@ -241,7 +303,6 @@ function ContactForm() {
                     </FormControl>
                   </SimpleGrid>
 
-                  {/* SECCIÓN 2: DATOS RESERVA */}
                   <Heading
                     size="sm"
                     alignSelf="start"
@@ -254,7 +315,6 @@ function ContactForm() {
                   >
                     Detalles del Viaje
                   </Heading>
-
                   <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
                     <FormControl isRequired>
                       <FormLabel fontSize="sm" fontWeight="bold">
@@ -371,7 +431,7 @@ function ContactForm() {
                     </FormLabel>
                     <Textarea
                       name="message"
-                      placeholder="Ej: Cuna para bebé, habitación en planta baja, alergias..."
+                      placeholder="Ej: Cuna para bebé, habitación en planta baja..."
                       value={formData.message}
                       onChange={handleInputChange}
                       rows={3}
@@ -379,33 +439,57 @@ function ContactForm() {
                     />
                   </FormControl>
 
-                  <Button
-                    type="submit"
-                    colorScheme="brand"
-                    bg="brand.500"
-                    size="lg"
-                    w="full"
-                    h="60px"
-                    fontSize="lg"
-                    isLoading={isSubmitting}
-                    loadingText="Enviando Solicitud..."
-                    rightIcon={<FaPaperPlane />}
-                    _hover={{
-                      bg: "brand.600",
-                      transform: "translateY(-2px)",
-                      shadow: "lg",
-                    }}
-                    transition="all 0.2s"
-                  >
-                    Confirmar Solicitud
-                  </Button>
+                  {/* --- ZONA DE BOTONES DE ACCIÓN --- */}
+                  <VStack w="full" spacing={3} pt={4}>
+                    {/* Opción 1: Pagar Ahora (Stripe) */}
+                    <Button
+                      onClick={handleOpenPayment}
+                      colorScheme="green"
+                      bg="brand.500"
+                      size="lg"
+                      w="full"
+                      h="60px"
+                      fontSize="lg"
+                      leftIcon={<FaCreditCard />}
+                      _hover={{
+                        bg: "brand.600",
+                        transform: "translateY(-2px)",
+                        shadow: "lg",
+                      }}
+                    >
+                      Pagar Ahora y Reservar
+                    </Button>
+
+                    <HStack w="full" align="center">
+                      <Divider />
+                      <Text fontSize="xs" color="gray.400" whiteSpace="nowrap">
+                        O reservar sin pagar
+                      </Text>
+                      <Divider />
+                    </HStack>
+
+                    {/* Opción 2: Pagar en Hotel (Email) */}
+                    <Button
+                      onClick={handlePayAtHotel}
+                      variant="outline"
+                      colorScheme="brand"
+                      size="lg"
+                      w="full"
+                      h="50px"
+                      fontSize="md"
+                      isLoading={isSubmitting}
+                      loadingText="Enviando..."
+                      leftIcon={<FaHotel />}
+                      _hover={{ bg: "brand.50", borderColor: "brand.500" }}
+                    >
+                      Pagar en Recepción
+                    </Button>
+                  </VStack>
                 </VStack>
               </CardBody>
             </Card>
           </Box>
 
-          {/* --- COLUMNA DERECHA: PROMOCIONES (Ocupa 1 espacio) --- */}
-          {/* position="sticky" hace que el sidebar te siga al hacer scroll */}
           <Box
             gridColumn={{ lg: "span 1" }}
             position={{ lg: "sticky" }}
@@ -414,6 +498,14 @@ function ContactForm() {
             <SpecialPromotions />
           </Box>
         </SimpleGrid>
+
+        {/* --- MODAL DE PAGO STRIPE --- */}
+        <PaymentModal
+          isOpen={isOpen}
+          onClose={onClose}
+          bookingData={formData}
+          onSuccess={handlePaymentSuccess}
+        />
       </Container>
     </Box>
   );

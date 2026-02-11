@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import hotelApi from '../services/api';
 
 // Exportamos el contexto para el hook

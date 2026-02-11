@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -28,14 +28,10 @@ import {
   FaCalendarAlt,
 } from "react-icons/fa";
 
-// --- IMPORT CORRECTO DEL HOOK ---
+// --- IMPORTS ---
 import { useData } from "../../hooks/useData";
-
+import hotelApi from "../../services/api";
 import SpecialPromotions from "./Promotions.jsx";
-import axios from "axios";
-
-// Logo
-import hotelLogo from "/assets/images/icon.png";
 
 function ContactForm() {
   const { reservationData, resetReservation } = useData();
@@ -78,6 +74,7 @@ function ContactForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 1. Validaciones Básicas
     if (
       !formData.name ||
       !formData.email ||
@@ -107,44 +104,33 @@ function ContactForm() {
 
     setIsSubmitting(true);
 
-    const emailHtml = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
-        <div style="text-align: center;">
-             <img src="${hotelLogo}" alt="Altura Andina" style="width: 80px; margin-bottom: 20px;">
-        </div>
-        <h2 style="color: #2c5282; text-align: center;">Solicitud de Reserva</h2>
-        <p>Hola <strong>${formData.name}</strong>,</p>
-        <p>Gracias por elegir Altura Andina. Hemos recibido tu solicitud:</p>
-        
-        <div style="background-color: #f7fafc; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <ul style="list-style: none; padding: 0;">
-            <li>📅 <strong>Del:</strong> ${formData.checkIn} <strong>Al:</strong> ${formData.checkOut}</li>
-            <li>👥 <strong>Huéspedes:</strong> ${formData.adults} Adultos, ${formData.kids} Niños</li>
-            <li>🛏️ <strong>Habitaciones:</strong> ${formData.rooms}</li>
-          </ul>
-        </div>
-        <p><strong>Mensaje:</strong> ${formData.message || "Sin mensaje adicional"}</p>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-        <p style="font-size: 0.9em; color: #718096; text-align: center;">Nos pondremos en contacto contigo en breve para confirmar disponibilidad y métodos de pago.</p>
-      </div>
-    `;
-
     try {
-      await axios.post("http://localhost:5000/send-email", {
+      // 2. ENVÍO AL BACKEND (Sin HTML sucio)
+      // Enviamos solo los datos. El backend usará el template 'emailTemplate.js'
+      await hotelApi.post("/services/email", {
         email: formData.email,
-        subject: `Nueva Solicitud: ${formData.name}`,
-        html: emailHtml,
+        subject: `Nueva Solicitud de Reserva: ${formData.name}`,
+        // Datos desglosados para el template:
+        name: formData.name,
+        checkIn: formData.checkIn,
+        checkOut: formData.checkOut,
+        adults: formData.adults,
+        kids: formData.kids,
+        rooms: formData.rooms,
+        message: formData.message,
       });
 
+      // 3. Éxito
       toast({
         title: "¡Solicitud Enviada!",
-        description: "Revisa tu correo, te hemos enviado los detalles.",
+        description: "Revisa tu bandeja de entrada para ver los detalles.",
         status: "success",
         duration: 5000,
         isClosable: true,
         position: "top",
       });
 
+      // Resetear formulario
       setFormData({
         name: "",
         email: "",
@@ -160,7 +146,7 @@ function ContactForm() {
       console.error("Error envío:", error);
       toast({
         title: "Error de conexión",
-        description: "No pudimos enviar la solicitud. Intenta más tarde.",
+        description: "No pudimos enviar la solicitud. Verifica tu conexión.",
         status: "error",
         duration: 4000,
         isClosable: true,
@@ -200,8 +186,7 @@ function ContactForm() {
           {/* --- COLUMNA IZQUIERDA: FORMULARIO (Ocupa 2 espacios) --- */}
           <Box gridColumn={{ lg: "span 2" }}>
             <Card bg={bgCard} shadow="xl" borderRadius="xl" overflow="hidden">
-              <Box h="6px" bgGradient="linear(to-r, brand.400, brand.600)" />{" "}
-              {/* Línea decorativa superior */}
+              <Box h="6px" bgGradient="linear(to-r, brand.400, brand.600)" />
               <CardBody p={{ base: 6, md: 10 }}>
                 <VStack as="form" spacing={6} onSubmit={handleSubmit}>
                   {/* SECCIÓN 1: DATOS PERSONALES */}
@@ -400,7 +385,7 @@ function ContactForm() {
                     bg="brand.500"
                     size="lg"
                     w="full"
-                    h="60px" // Botón más alto para mejor tacto
+                    h="60px"
                     fontSize="lg"
                     isLoading={isSubmitting}
                     loadingText="Enviando Solicitud..."

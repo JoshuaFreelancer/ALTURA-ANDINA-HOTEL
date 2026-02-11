@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Box,
   Flex,
@@ -9,8 +9,8 @@ import {
   Collapse,
   useDisclosure,
   Icon,
-  Badge,
   Container,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import {
@@ -19,35 +19,37 @@ import {
   FaBed,
   FaConciergeBell,
   FaPhone,
+  FaCalendarCheck,
 } from "react-icons/fa";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getWeatherByCity } from "../services/api";
+
+// Widget del Clima Corregido
+import WeatherWidget from "../components/common/WeatherWidget";
 
 const MotionFlex = motion(Flex);
 
 function Header() {
   const { isOpen, onToggle } = useDisclosure();
-  const [weather, setWeather] = useState(null);
 
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const data = await getWeatherByCity("Mérida", "es");
-        setWeather(data);
-      } catch (error) {
-        console.error("Error clima:", error);
-      }
-    };
-    fetchWeather();
-  }, []);
+  // Colores dinámicos
+  const bgHeader = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.100", "gray.700");
 
   return (
-    <Box position="sticky" top="0" zIndex="1000" bg="white" shadow="sm">
+    <Box
+      position="sticky"
+      top="0"
+      zIndex="1000"
+      bg={bgHeader}
+      shadow="sm"
+      borderBottom="1px solid"
+      borderColor={borderColor}
+    >
       <Container maxW="container.xl" px={4}>
         <Flex minH={"70px"} align={"center"} justify={"space-between"}>
-          {/* Toggle Móvil */}
-          <Flex display={{ base: "flex", md: "none" }}>
+          {/* 1. Toggle Móvil */}
+          <Flex display={{ base: "flex", lg: "none" }}>
             <IconButton
               onClick={onToggle}
               icon={
@@ -62,13 +64,14 @@ function Header() {
             />
           </Flex>
 
-          {/* Logo */}
-          <Flex flex={{ base: 1 }} justify={{ base: "center", md: "start" }}>
+          {/* 2. Logo */}
+          <Flex flex={{ base: 1 }} justify={{ base: "center", lg: "start" }}>
             <RouterLink to="/">
               <MotionFlex
                 align="center"
                 cursor="pointer"
                 whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <Icon as={FaMountain} w={8} h={8} color="brand.500" mr={2} />
                 <Text
@@ -77,48 +80,57 @@ function Header() {
                   fontWeight="bold"
                   fontSize="xl"
                   color={"brand.600"}
+                  letterSpacing="tight"
                 >
                   Altura Andina
                 </Text>
               </MotionFlex>
             </RouterLink>
 
-            <Flex display={{ base: "none", md: "flex" }} ml={10}>
+            {/* Navegación Desktop CON ICONOS */}
+            <Flex display={{ base: "none", lg: "flex" }} ml={10}>
               <DesktopNav />
             </Flex>
           </Flex>
 
-          {/* Clima */}
+          {/* 3. Lado Derecho: Clima y Acción */}
           <Stack
             flex={{ base: 1, md: 0 }}
             justify={"flex-end"}
             direction={"row"}
-            spacing={6}
+            spacing={4}
+            align="center"
           >
-            {weather && (
-              <Badge
-                colorScheme="blue"
-                borderRadius="full"
-                px={3}
-                py={1}
-                display="flex"
-                alignItems="center"
-              >
-                <Text fontSize="sm" fontWeight="bold">
-                  {Math.round(weather.main.temp)}°C
-                </Text>
-                <Text
-                  fontSize="xs"
-                  ml={2}
-                  display={{ base: "none", md: "block" }}
-                >
-                  {weather.weather[0].description}
-                </Text>
-              </Badge>
-            )}
+            {/* Widget del Clima */}
+            <Box display={{ base: "none", md: "block" }}>
+              <WeatherWidget />
+            </Box>
+
+            {/* Botón de Reserva Destacado */}
+            <Button
+              as={RouterLink}
+              to="/contacto"
+              display={{ base: "none", md: "inline-flex" }}
+              fontSize={"sm"}
+              fontWeight={600}
+              color={"white"}
+              bg={"brand.500"}
+              leftIcon={<FaCalendarCheck />}
+              _hover={{
+                bg: "brand.600",
+                transform: "translateY(-2px)",
+                boxShadow: "md",
+              }}
+              size="sm"
+              rounded="full"
+              px={6}
+            >
+              Reservar
+            </Button>
           </Stack>
         </Flex>
 
+        {/* Menú Desplegable Móvil */}
         <Collapse in={isOpen} animateOpacity>
           <MobileNav />
         </Collapse>
@@ -127,7 +139,7 @@ function Header() {
   );
 }
 
-// DATOS DE NAVEGACIÓN
+// --- DATOS DE NAVEGACIÓN ---
 const NAV_ITEMS = [
   { label: "Inicio", icon: FaHome, href: "/" },
   { label: "Habitaciones", icon: FaBed, href: "/habitaciones" },
@@ -135,25 +147,37 @@ const NAV_ITEMS = [
   { label: "Contacto", icon: FaPhone, href: "/contacto" },
 ];
 
-// MENU DESKTOP
+// --- COMPONENTE MENU DESKTOP (Restaurado con Iconos) ---
 const DesktopNav = () => {
+  const linkColor = useColorModeValue("gray.600", "gray.200");
+  const linkHoverColor = useColorModeValue("brand.500", "brand.300");
+  const activeBg = useColorModeValue("brand.50", "whiteAlpha.200");
+
   return (
-    <Stack direction={"row"} spacing={4} align="center">
+    <Stack direction={"row"} spacing={2} align="center">
       {NAV_ITEMS.map((navItem) => (
         <Button
           key={navItem.label}
-          as={RouterLink}
+          as={NavLink}
           to={navItem.href}
+          leftIcon={<Icon as={navItem.icon} />} // ¡Aquí vuelven los iconos!
           variant="ghost"
           fontSize={"sm"}
           fontWeight={500}
-          leftIcon={<Icon as={navItem.icon} />}
-          color={"gray.600"}
+          color={linkColor}
           _hover={{
             textDecoration: "none",
-            color: "brand.500",
-            bg: "brand.50",
+            color: linkHoverColor,
+            bg: activeBg,
           }}
+          _activeLink={{
+            color: linkHoverColor,
+            fontWeight: "bold",
+            bg: activeBg,
+            borderColor: "brand.500",
+          }}
+          px={4}
+          rounded="md"
         >
           {navItem.label}
         </Button>
@@ -162,34 +186,58 @@ const DesktopNav = () => {
   );
 };
 
-// MENU MOVIL
+// --- COMPONENTE MENU MOVIL ---
 const MobileNav = () => {
   return (
     <Stack
-      bg={"white"}
+      bg={useColorModeValue("white", "gray.800")}
       p={4}
-      display={{ md: "none" }}
+      display={{ lg: "none" }}
       borderTop="1px solid"
-      borderColor="gray.100"
+      borderColor={useColorModeValue("gray.100", "gray.700")}
+      spacing={4}
     >
+      {/* Widget del Clima en Móvil */}
+      <Flex justify="center" py={2}>
+        <WeatherWidget />
+      </Flex>
+
       {NAV_ITEMS.map((navItem) => (
         <Flex
           key={navItem.label}
           py={2}
-          as={RouterLink}
+          as={NavLink}
           to={navItem.href}
           justify={"space-between"}
           align={"center"}
           _hover={{ textDecoration: "none" }}
+          style={({ isActive }) => ({
+            color: isActive ? "var(--chakra-colors-brand-500)" : "inherit",
+            fontWeight: isActive ? "bold" : "normal",
+          })}
         >
           <Flex align="center">
-            <Icon as={navItem.icon} color="brand.500" mr={3} />
-            <Text fontWeight={600} color="gray.600">
+            <Icon as={navItem.icon} color="brand.500" mr={3} w={5} h={5} />
+            <Text
+              fontWeight={600}
+              color={useColorModeValue("gray.600", "gray.200")}
+            >
               {navItem.label}
             </Text>
           </Flex>
         </Flex>
       ))}
+
+      <Button
+        as={RouterLink}
+        to="/contacto"
+        w="full"
+        colorScheme="brand"
+        bg="brand.500"
+        leftIcon={<FaCalendarCheck />}
+      >
+        Reservar Ahora
+      </Button>
     </Stack>
   );
 };

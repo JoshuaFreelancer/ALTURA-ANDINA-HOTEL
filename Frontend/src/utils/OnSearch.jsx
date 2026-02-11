@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Input,
@@ -7,88 +7,145 @@ import {
   InputLeftElement,
   Stack,
   Icon,
+  Select,
   FormControl,
+  FormLabel,
+  useColorModeValue,
 } from "@chakra-ui/react";
-import { FaSearch, FaUndo, FaUserFriends } from "react-icons/fa";
-import { useHabitaciones } from "../hooks/useHabitacionesContext";
+import { FaUndo, FaUserFriends, FaBed } from "react-icons/fa";
+
+// --- CORRECCIÓN IMPORTANTE ---
+// Importamos el hook correcto desde la carpeta correcta
+import { useRooms } from "../hooks/useRooms";
 
 const OnSearch = () => {
-  const { habitaciones, setFilteredHabitaciones } = useHabitaciones();
-  const [capacity, setCapacity] = useState("");
+  // Consumimos el hook useRooms
+  const { habitaciones, setFilteredHabitaciones } = useRooms();
+
+  // Estado local para los filtros
+  const [filters, setFilters] = useState({
+    capacity: "",
+    type: "",
+  });
+
+  // Extraemos los tipos únicos de habitación para el Select
+  // (Ej: ["Estándar", "Lujo", "Ejecutiva"])
+  const roomTypes = [...new Set(habitaciones.map((h) => h.roomType))];
 
   // --- EFECTO DE FILTRADO ---
-  // Se ejecuta automáticamente cada vez que cambia 'capacity' o la lista de habitaciones.
-  // Esto elimina la necesidad de funciones debounce complejas para este caso simple.
+  // Se ejecuta automáticamente cuando cambia algún filtro o la lista base
   useEffect(() => {
-    // Si no hay datos, no hacemos nada
     if (!habitaciones) return;
 
     let result = habitaciones;
 
-    if (capacity !== "") {
-      const numPeople = parseInt(capacity);
+    // 1. Filtro por Capacidad
+    if (filters.capacity !== "") {
+      const numPeople = parseInt(filters.capacity);
       if (!isNaN(numPeople)) {
-        // CORRECCIÓN LÓGICA:
-        // Buscamos habitaciones donde quepa la gente (Capacidad >= Búsqueda)
+        // Buscamos habitaciones donde quepan al menos N personas
         result = result.filter((h) => h.capacity >= numPeople);
       }
     }
 
-    setFilteredHabitaciones(result);
-  }, [capacity, habitaciones, setFilteredHabitaciones]);
+    // 2. Filtro por Tipo
+    if (filters.type !== "") {
+      result = result.filter((h) => h.roomType === filters.type);
+    }
 
-  // --- RESET ---
-  const handleResetFilters = () => {
-    setCapacity("");
-    // No necesitamos llamar a filter() aquí manualmente,
-    // el useEffect detectará el cambio a '' y reseteará la lista automáticamente.
+    // Actualizamos la lista que se ve en pantalla
+    setFilteredHabitaciones(result);
+  }, [filters, habitaciones, setFilteredHabitaciones]);
+
+  // Manejadores de cambios
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleResetFilters = () => {
+    setFilters({ capacity: "", type: "" });
+  };
+
+  // Estilos
+  const bgBar = useColorModeValue("white", "gray.800");
+
   return (
-    <Box w="100%" py={6} px={4}>
+    <Box
+      w="100%"
+      bg={bgBar}
+      p={6}
+      borderRadius="xl"
+      boxShadow="lg"
+      border="1px solid"
+      borderColor="gray.100"
+    >
       <Stack
         direction={{ base: "column", md: "row" }}
-        spacing={4}
-        align="center"
+        spacing={6}
+        align="flex-end" // Alineamos abajo para que los inputs coincidan con el botón
         justify="center"
-        maxW="800px"
-        mx="auto"
       >
-        {/* Input de Búsqueda */}
-        <FormControl maxW={{ base: "100%", md: "400px" }}>
-          <InputGroup size="lg">
-            <InputLeftElement pointerEvents="none">
-              <Icon as={FaUserFriends} color="gray.400" />
+        {/* FILTRO 1: CAPACIDAD */}
+        <FormControl maxW={{ base: "100%", md: "300px" }}>
+          <FormLabel fontSize="sm" fontWeight="bold" color="gray.500" mb={1}>
+            Huéspedes
+          </FormLabel>
+          <InputGroup>
+            <InputLeftElement pointerEvents="none" color="brand.400">
+              <Icon as={FaUserFriends} />
             </InputLeftElement>
             <Input
               type="number"
-              placeholder="¿Cuántas personas son?"
-              value={capacity}
-              onChange={(e) => setCapacity(e.target.value)}
-              bg="white"
-              borderColor="gray.300"
-              _focus={{
-                borderColor: "brand.500",
-                boxShadow: "0 0 0 1px var(--chakra-colors-brand-500)",
-              }}
-              _hover={{
-                borderColor: "brand.400",
-              }}
+              name="capacity"
+              placeholder="¿Cuántas personas?"
+              value={filters.capacity}
+              onChange={handleInputChange}
+              min={1}
+              focusBorderColor="brand.500"
+              borderRadius="md"
             />
           </InputGroup>
         </FormControl>
 
-        {/* Botón de Reset (Solo aparece si hay filtro) */}
-        {capacity && (
+        {/* FILTRO 2: TIPO DE HABITACIÓN */}
+        <FormControl maxW={{ base: "100%", md: "300px" }}>
+          <FormLabel fontSize="sm" fontWeight="bold" color="gray.500" mb={1}>
+            Categoría
+          </FormLabel>
+          <InputGroup>
+            <InputLeftElement pointerEvents="none" color="brand.400">
+              <Icon as={FaBed} />
+            </InputLeftElement>
+            <Select
+              name="type"
+              placeholder="Todas las categorías"
+              value={filters.type}
+              onChange={handleInputChange}
+              pl={10} // Espacio para el icono a la izquierda
+              focusBorderColor="brand.500"
+              borderRadius="md"
+            >
+              {roomTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </Select>
+          </InputGroup>
+        </FormControl>
+
+        {/* BOTÓN DE RESET */}
+        {(filters.capacity || filters.type) && (
           <Button
             leftIcon={<FaUndo />}
             colorScheme="gray"
             variant="ghost"
             onClick={handleResetFilters}
-            size="lg"
-            _hover={{ bg: "brand.100", color: "brand.600" }}
+            mb="2px" // Ajuste fino de alineación
+            _hover={{ bg: "red.50", color: "red.500" }}
           >
-            Ver todas
+            Limpiar filtros
           </Button>
         )}
       </Stack>

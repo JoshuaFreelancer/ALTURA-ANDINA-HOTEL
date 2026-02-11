@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   Box, 
   Container, 
@@ -6,7 +5,6 @@ import {
   Stack, 
   Text, 
   Input, 
-  Button, 
   IconButton, 
   Link, 
   Flex,
@@ -17,7 +15,8 @@ import {
   InputRightElement
 } from '@chakra-ui/react';
 import { NavLink as RouterLink } from 'react-router-dom';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaMountain, FaPaperPlane } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaMountain, FaPaperPlane } from 'react-icons/fa';
+import { FaXTwitter } from "react-icons/fa6";
 
 const SocialButton = ({ icon, href }) => (
   <IconButton
@@ -67,9 +66,8 @@ const Footer = () => {
             </Text>
             <Stack direction="row" spacing={4}>
               <SocialButton icon={FaFacebook} href="https://facebook.com" />
-              <SocialButton icon={FaTwitter} href="https://twitter.com" />
+              <SocialButton icon={FaXTwitter} href="https://x.com/?lang=es" />
               <SocialButton icon={FaInstagram} href="https://instagram.com" />
-              <SocialButton icon={FaLinkedin} href="https://linkedin.com" />
             </Stack>
           </Stack>
 

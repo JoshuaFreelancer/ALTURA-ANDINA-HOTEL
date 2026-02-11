@@ -1,108 +1,111 @@
 import {
   BrowserRouter as Router,
-  Route,
   Routes,
+  Route,
   useLocation,
 } from "react-router-dom";
-import { useTransition, animated } from "react-spring";
 import { Box, Flex } from "@chakra-ui/react";
+import { AnimatePresence, motion } from "framer-motion";
 
-// Componentes
-import Header from "./components/Header";
-import Welcome from "./components/Welcome";
-import HotelSection from "./components/HotelSection";
-import HotelCarousel from "./components/HotelCarousel";
-import Habitaciones from "./components/Rooms"; // Ojo: Verifica que el archivo se llame Rooms.jsx
-import ReservationBar from "./components/ReservationBar";
-import ServicesSection from "./components/ServicesSection";
-import Testimonials from "./components/Testimonials";
-import ContactForm from "./components/ContactForm";
-import BlogSection from "./components/BlogSection";
-import Footer from "./components/Footer";
-import ScrollToTopButton from "./utils/ScrollToTopButton";
-import OnSearch from "./utils/OnSearch";
+// --- LAYOUTS Y UTILIDADES ---
+import Header from "./layout/Header";
+import Footer from "./layout/Footer";
+import ScrollToTop from "./components/common/ScrollToTop";
 
-// Contextos
-import { HabitacionesProvider } from "./hooks/useHabitacionesContext";
-import { DataProvider } from "./hooks/DataContext";
+// --- PÁGINAS (VISTAS COMPLETAS) ---
+import HomePage from "./pages/HomePage";
+import RoomsPage from "./pages/RoomsPage";
+import ServicesPage from "./pages/ServicesPage";
+import ContactPage from "./pages/ContactPage";
 
-// Eliminamos App.css si solo tenía parches. Si tiene estilos globales útiles, déjalo.
-// import "./App.css";
-
-function App() {
+// 1. Componente Wrapper para la animación (Fade Up suave)
+const PageTransition = ({ children }) => {
   return (
-    // 1. Contextos de Datos (Lógica)
-    <HabitacionesProvider>
-      <DataProvider>
-        <Router>
-          {/* 2. Layout Principal usando Flex de Chakra */}
-          {/* minH="100vh" asegura que el footer siempre se vaya al fondo si hay poco contenido */}
-          <Flex direction="column" minH="100vh" bg="gray.50">
-            <Header />
-
-            {/* 3. Contenido Principal (Crece para ocupar espacio) */}
-            <Box as="main" flex="1" w="100%">
-              <AnimatedRoutes />
-            </Box>
-
-            <Footer />
-            <ScrollToTopButton />
-          </Flex>
-        </Router>
-      </DataProvider>
-    </HabitacionesProvider>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }} // Empieza transparente y un poco abajo
+      animate={{ opacity: 1, y: 0 }} // Sube a su sitio y se hace visible
+      exit={{ opacity: 0, y: -20 }} // Se va hacia arriba y desaparece
+      transition={{ duration: 0.3, ease: "easeInOut" }} // Duración de 0.3s
+      style={{ width: "100%", height: "100%" }} // Asegura que ocupe el espacio
+    >
+      {children}
+    </motion.div>
   );
-}
+};
 
-// Componente para manejar las animaciones de las rutas
+// 2. Sub-componente que maneja la lógica de rutas y ubicación
 const AnimatedRoutes = () => {
   const location = useLocation();
 
-  // Configuración de la animación (Fade In/Out suave)
-  const transitions = useTransition(location, {
-    from: { opacity: 0, transform: "translateY(10px)" }, // Empieza un poco abajo y transparente
-    enter: { opacity: 1, transform: "translateY(0px)" }, // Entra a su sitio
-    leave: { opacity: 0, transform: "translateY(-10px)" }, // Se va hacia arriba
-    config: { duration: 300 }, // Duración en ms
-  });
+  return (
+    // mode="wait" asegura que la página vieja salga antes de que entre la nueva
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route
+          path="/"
+          element={
+            <PageTransition>
+              <HomePage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/habitaciones"
+          element={
+            <PageTransition>
+              <RoomsPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/servicios"
+          element={
+            <PageTransition>
+              <ServicesPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/contacto"
+          element={
+            <PageTransition>
+              <ContactPage />
+            </PageTransition>
+          }
+        />
 
-  return transitions((styles, item) => (
-    // animated.div es necesario para react-spring.
-    // Usamos style={{ ...styles, width: '100%' }} para aplicar la animación y asegurar ancho total.
-    <animated.div style={{ ...styles, width: "100%" }}>
-      <Routes location={item}>
-        <Route path="/" element={<Home />} />
-        <Route path="/habitaciones" element={<RoomsPage />} />
-        <Route path="/servicios" element={<ServicesSection />} />
-        <Route path="/contacto" element={<ContactForm />} />
+        {/* Ruta 404 */}
+        <Route
+          path="*"
+          element={
+            <PageTransition>
+              <HomePage />
+            </PageTransition>
+          }
+        />
       </Routes>
-    </animated.div>
-  ));
+    </AnimatePresence>
+  );
 };
 
-// --- SUB-COMPONENTES DE PAGINA ---
+function App() {
+  return (
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ScrollToTop />
 
-const Home = () => (
-  <Flex direction="column" gap={0}>
-    {/* gap={0} asegura que no haya espacios blancos raros entre secciones */}
-    <Welcome />
-    <ReservationBar />
-    <HotelSection />
-    <Testimonials />
-    <BlogSection />
-  </Flex>
-);
+      <Flex direction="column" minH="100vh" bg="gray.50">
+        <Header />
 
-const RoomsPage = () => (
-  <Flex direction="column" gap={6} pb={10}>
-    <HotelCarousel />
-    <Box px={{ base: 4, md: 8 }}>
-      {" "}
-      {/* Margen lateral responsivo */}
-      <OnSearch />
-      <Habitaciones />
-    </Box>
-  </Flex>
-);
+        {/* Contenido Principal */}
+        <Box as="main" flex="1" w="100%">
+          {/* Renderizamos el componente que contiene la lógica de animación */}
+          <AnimatedRoutes />
+        </Box>
+
+        <Footer />
+      </Flex>
+    </Router>
+  );
+}
 
 export default App;

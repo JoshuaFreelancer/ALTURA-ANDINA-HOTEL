@@ -5,9 +5,7 @@ import {
   Flex,
   Heading,
   Button,
-  Stack,
   IconButton,
-  Link,
   Text,
   VStack,
   HStack,
@@ -18,6 +16,10 @@ import { FaXTwitter } from "react-icons/fa6";
 
 // Animación para el título
 const MotionHeading = motion(Heading);
+
+//Imagen para el hero
+const HeroImage =
+  "https://res.cloudinary.com/drfyy4i0s/image/upload/v1770902445/Hero_umijtb.jpg";
 
 function Hero() {
   const handleRedirect = (url) => {
@@ -48,7 +50,7 @@ function Hero() {
       <Flex
         w="100%"
         h="100%"
-        bgImage="url('/assets/images/Hero.jpg')"
+        bgImage={`url(${HeroImage})`}
         bgSize="cover"
         bgPosition="center"
         align="center"

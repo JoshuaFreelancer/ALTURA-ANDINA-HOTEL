@@ -34,7 +34,9 @@ const TESTIMONIALS = [
     author: "Juan Perez",
     role: "Viaje de Aniversario",
     rating: 5,
-    image: "/assets/images/client1.jpg",
+    // Cambios: w_500, h_500 (Alta resolución) y q_100 (Máxima calidad)
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/w_500,h_500,c_fill,g_face,q_100/v1770903418/client1_uwmbic.jpg",
     date: "12 FEB 2024",
   },
   {
@@ -43,7 +45,8 @@ const TESTIMONIALS = [
     author: "Laura Mendoza",
     role: "Turista Internacional",
     rating: 5,
-    image: "/assets/images/client2.jpg",
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/w_500,h_500,c_fill,g_face,q_100/v1770903421/client4_boz0ze.jpg",
     date: "05 ENE 2024",
   },
   {
@@ -52,7 +55,8 @@ const TESTIMONIALS = [
     author: "Familia Rivas",
     role: "Vacaciones Familiares",
     rating: 4,
-    image: "/assets/images/client3.jpg",
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/w_500,h_500,c_fill,g_face,q_100/v1770903420/client3_j0veyd.jpg",
     date: "20 DIC 2023",
   },
   {
@@ -61,7 +65,8 @@ const TESTIMONIALS = [
     author: "Ana & David",
     role: "Pareja Aventurera",
     rating: 5,
-    image: "/assets/images/client4.jpg",
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/w_500,h_500,c_fill,g_face,q_100/v1770903419/client2_xogu8v.jpg",
     date: "14 NOV 2023",
   },
   {
@@ -70,7 +75,8 @@ const TESTIMONIALS = [
     author: "Luis Hernández",
     role: "Nómada Digital",
     rating: 5,
-    image: "/assets/images/client5.jpg",
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/w_500,h_500,c_fill,g_face,q_100/v1770903444/client5_plqm62.jpg",
     date: "02 OCT 2023",
   },
 ];

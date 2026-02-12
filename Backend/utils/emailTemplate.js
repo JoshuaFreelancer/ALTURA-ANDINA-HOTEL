@@ -1,9 +1,6 @@
-// backend/utils/emailTemplate.js
-
 const createEmailTemplate = (data) => {
   const { name, checkIn, checkOut, adults, kids, rooms, message } = data;
 
-  // 1. TU PALETA DE COLORES EXACTA
   const colors = {
     bgApp: "#F0F7FC", // brand.50
     bgLight: "#E6F0F8", // brand.100
@@ -14,10 +11,9 @@ const createEmailTemplate = (data) => {
     white: "#ffffff",
   };
 
-  // 2. URL DEL LOGO (Recuerda cambiarla cuando subas tu logo a la nube)
-  // Por ahora uso un placeholder con tus colores
+  // URL DE TU LOGO EN CLOUDINARY
   const logoUrl =
-    "https://via.placeholder.com/200x60/1E2626/6998A7?text=ALTURA+ANDINA";
+    "https://res.cloudinary.com/drfyy4i0s/image/upload/v1770903132/icon_wozxex.png";
 
   return `
 <!DOCTYPE html>
@@ -33,7 +29,7 @@ const createEmailTemplate = (data) => {
       margin: 0; 
       padding: 0; 
       background-color: ${colors.bgApp}; 
-      font-family: 'Lato', Helvetica, Arial, sans-serif; /* Fuente cuerpo */
+      font-family: 'Lato', Helvetica, Arial, sans-serif; 
       color: ${colors.darkText};
     }
     
@@ -54,10 +50,18 @@ const createEmailTemplate = (data) => {
       border-bottom: 4px solid ${colors.primary};
     }
     
+    /* Estilo para el Logo */
+    .header img {
+      width: 80px; /* Tamaño del logo */
+      height: auto;
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+
     .header h1 {
       color: ${colors.white};
       margin: 0;
-      font-family: 'Playfair Display', Georgia, serif; /* Fuente Títulos */
+      font-family: 'Playfair Display', Georgia, serif; 
       font-size: 26px;
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -82,7 +86,7 @@ const createEmailTemplate = (data) => {
     }
     
     p { 
-      color: #5d6d6c; /* Un gris verdoso suave */
+      color: #5d6d6c; 
       line-height: 1.6; 
       font-size: 15px;
     }
@@ -123,11 +127,11 @@ const createEmailTemplate = (data) => {
     /* Botón */
     .btn { 
       display: inline-block; 
-      background-color: ${colors.darkText}; /* Botón oscuro elegante */
+      background-color: ${colors.darkText}; 
       color: ${colors.bgApp}; 
       padding: 14px 35px; 
       text-decoration: none; 
-      border-radius: 8px; /* Bordes menos redondos para ser más elegante */
+      border-radius: 8px; 
       font-weight: bold; 
       margin-top: 25px; 
       font-size: 14px;
@@ -156,6 +160,8 @@ const createEmailTemplate = (data) => {
   <div class="container">
     
     <div class="header">
+      <img src="${logoUrl}" alt="Logotipo Altura Andina" />
+      
       <h1>Altura Andina</h1>
       <p>Hotel & Spa • Mérida</p>
     </div>

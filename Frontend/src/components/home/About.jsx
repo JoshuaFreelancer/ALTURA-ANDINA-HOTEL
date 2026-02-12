@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Heading,
@@ -17,6 +16,7 @@ import { NavLink } from "react-router-dom";
 
 const MotionBox = motion(Box);
 const MotionImage = motion(Image);
+const AboutImage = "https://res.cloudinary.com/drfyy4i0s/image/upload/v1770903399/About_c6ozea.png";
 
 const About = () => {
   const bgSection = useColorModeValue("white", "gray.800");
@@ -45,7 +45,7 @@ const About = () => {
             />
 
             <MotionImage
-              src="/assets/images/Hotel.png"
+              src={AboutImage}
               alt="Vista del Hotel Altura Andina frente a la Sierra Nevada"
               borderRadius="2xl"
               boxShadow="2xl"

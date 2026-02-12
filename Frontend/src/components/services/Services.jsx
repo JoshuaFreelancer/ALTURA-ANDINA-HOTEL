@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Heading,
@@ -8,7 +7,6 @@ import {
   Stack,
   Icon,
   Flex,
-  useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
@@ -23,43 +21,57 @@ import {
 
 const MotionBox = motion(Box);
 
-// --- DATOS ---
+// --- DATOS: URLs simplificadas con q_100 (Máxima Calidad) ---
 const services = [
   {
     title: "Gastronomía Andina",
-    description: "Fusión de sabores locales e internacionales en nuestro restaurante panorámico.",
+    description:
+      "Fusión de sabores locales e internacionales en nuestro restaurante panorámico.",
     icon: MdRestaurant,
-    image: "/assets/images/Restaurante.jpeg",
+    // Eliminamos parámetros complejos. Solo q_100 para calidad máxima.
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/q_100/v1770903682/Restaurante_iwvf35.jpg",
   },
   {
     title: "Spa & Wellness",
-    description: "Masajes relajantes, sauna y tratamientos corporales con productos orgánicos.",
+    description:
+      "Masajes relajantes, sauna y tratamientos corporales con productos orgánicos.",
     icon: MdHotTub,
-    image: "/assets/images/Spa.jpeg",
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/q_100/v1770903685/Spa_uujtjj.jpg",
   },
   {
     title: "Conexión Total",
-    description: "Wi-Fi de fibra óptica de alta velocidad en todas las instalaciones.",
+    description:
+      "Wi-Fi de fibra óptica de alta velocidad en todas las instalaciones.",
     icon: MdWifi,
-    image: "/assets/images/Wifi.jpeg",
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/q_100/v1770903687/Wifi_m2bbqy.jpg",
   },
   {
     title: "Rutas de Montaña",
-    description: "Excursiones guiadas al Pico Bolívar y lagunas de la Sierra Nevada.",
+    description:
+      "Excursiones guiadas al Pico Bolívar y lagunas de la Sierra Nevada.",
     icon: MdDirectionsWalk,
-    image: "/assets/images/Montaña.jpeg",
+    // OJO: La ñ en la URL a veces da problemas si no está codificada. Aquí usamos la versión segura.
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/q_100/v1770903635/Monta%C3%B1a_h3vlto.jpg",
   },
   {
     title: "Recreación",
-    description: "Paseos a caballo, senderismo y actividades para toda la familia.",
+    description:
+      "Paseos a caballo, senderismo y actividades para toda la familia.",
     icon: MdLocalActivity,
-    image: "/assets/images/Recreacion.jpg",
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/q_100/v1770903727/eskil-helgesen-5RJ7FdzGlyE-unsplash_f7hssg.jpg",
   },
   {
     title: "Eventos Corporativos",
-    description: "Salas equipadas para conferencias, retiros y celebraciones especiales.",
+    description:
+      "Salas equipadas para conferencias, retiros y celebraciones especiales.",
     icon: MdBusiness,
-    image: "/assets/images/Reuniones.jpg",
+    image:
+      "https://res.cloudinary.com/drfyy4i0s/image/upload/q_100/v1770903684/Reuniones_yuzuyg.jpg",
   },
 ];
 
@@ -67,19 +79,20 @@ const services = [
 const ServiceCard = ({ title, description, icon, image }) => {
   return (
     <Box
-      role="group" // Activa el hover en los hijos
+      role="group"
       position="relative"
-      h="350px" // Altura fija vertical elegante
+      h="350px"
       w="100%"
       borderRadius="2xl"
       overflow="hidden"
       boxShadow="xl"
       cursor="pointer"
     >
-      {/* 1. IMAGEN DE FONDO (Con Zoom al Hover) */}
+      {/* 1. IMAGEN DE FONDO */}
       <Box
         position="absolute"
         inset={0}
+        // Usamos comillas dobles externas y simples internas para asegurar que la URL se lea bien
         bgImage={`url('${image}')`}
         bgSize="cover"
         bgPosition="center"
@@ -87,7 +100,7 @@ const ServiceCard = ({ title, description, icon, image }) => {
         _groupHover={{ transform: "scale(1.1)" }}
       />
 
-      {/* 2. OVERLAY GRADIENTE (Oscuro abajo para leer texto) */}
+      {/* 2. OVERLAY GRADIENTE */}
       <Box
         position="absolute"
         inset={0}
@@ -97,7 +110,7 @@ const ServiceCard = ({ title, description, icon, image }) => {
         _groupHover={{ opacity: 1 }}
       />
 
-      {/* 3. ICONO FLOTANTE (Efecto Glassmorphism) */}
+      {/* 3. ICONO FLOTANTE */}
       <Flex
         position="absolute"
         top={4}
@@ -111,12 +124,16 @@ const ServiceCard = ({ title, description, icon, image }) => {
         borderRadius="xl"
         border="1px solid whiteAlpha.300"
         transition="all 0.3s"
-        _groupHover={{ bg: "brand.500", color: "white", transform: "rotate(10deg)" }}
+        _groupHover={{
+          bg: "brand.500",
+          color: "white",
+          transform: "rotate(10deg)",
+        }}
       >
         <Icon as={icon} w={6} h={6} color="white" />
       </Flex>
 
-      {/* 4. CONTENIDO (Texto) */}
+      {/* 4. CONTENIDO */}
       <Stack
         position="absolute"
         bottom={0}
@@ -124,9 +141,9 @@ const ServiceCard = ({ title, description, icon, image }) => {
         p={8}
         spacing={2}
         w="100%"
-        transform="translateY(10px)" // Ligeramente abajo
+        transform="translateY(10px)"
         transition="transform 0.3s"
-        _groupHover={{ transform: "translateY(0)" }} // Sube al hacer hover
+        _groupHover={{ transform: "translateY(0)" }}
       >
         <Heading
           size="lg"
@@ -136,26 +153,26 @@ const ServiceCard = ({ title, description, icon, image }) => {
         >
           {title}
         </Heading>
-        
+
         <Text
           color="gray.300"
           fontSize="md"
           noOfLines={3}
           lineHeight="tall"
-          opacity={0.8} // Un poco transparente
+          opacity={0.8}
           transition="all 0.3s"
-          _groupHover={{ opacity: 1, color: "white" }} // Se ilumina al hover
+          _groupHover={{ opacity: 1, color: "white" }}
         >
           {description}
         </Text>
-        
+
         {/* Barra decorativa animada */}
-        <Box 
-          w="0%" 
-          h="3px" 
-          bg="brand.500" 
+        <Box
+          w="0%"
+          h="3px"
+          bg="brand.500"
           transition="width 0.4s ease-out"
-          _groupHover={{ w: "40%" }} 
+          _groupHover={{ w: "40%" }}
         />
       </Stack>
     </Box>
@@ -190,16 +207,12 @@ const ServicesSection = () => {
           >
             Comodidades de Lujo
           </Text>
-          <Heading
-            as="h2"
-            size="2xl"
-            color="white"
-            fontFamily="heading"
-          >
+          <Heading as="h2" size="2xl" color="white" fontFamily="heading">
             Todo lo que necesitas
           </Heading>
           <Text fontSize="lg" color="gray.400" maxW="2xl">
-            Diseñamos cada detalle de tu estadía para garantizar confort, diversión y descanso.
+            Diseñamos cada detalle de tu estadía para garantizar confort,
+            diversión y descanso.
           </Text>
         </VStack>
 

@@ -1,12 +1,9 @@
-import React from "react";
 import {
   Box,
   Heading,
   Text,
   SimpleGrid,
   Container,
-  Link,
-  Stack,
   Icon,
   Flex,
   Button,
@@ -25,6 +22,10 @@ import {
 
 const MotionBox = motion(Box);
 
+// --- 1. DEFINICIÓN DE IMÁGENES CLOUDINARY ---
+const TourismImage = "https://res.cloudinary.com/drfyy4i0s/image/upload/v1770903537/El-teleferico-Mukumbari-en-el-estado-de-Merida-Venezuela_w7rtvx.jpg";
+const HikingImage = "https://res.cloudinary.com/drfyy4i0s/image/upload/v1770903574/100575522.700x525_mim72s.jpg";
+
 // --- TARJETA DE IMAGEN (Para Artículos y Guías) ---
 const ImageCard = ({ title, description, image, link, linkText, icon }) => {
   return (
@@ -34,24 +35,23 @@ const ImageCard = ({ title, description, image, link, linkText, icon }) => {
       target="_blank"
       rel="noopener noreferrer"
       position="relative"
-      h="400px" // Altura fija para uniformidad
+      h="400px" 
       borderRadius="2xl"
       overflow="hidden"
-      role="group" // Para efectos hover en grupo
+      role="group"
       boxShadow="xl"
     >
-      {/* 1. Imagen de Fondo con Zoom al Hover */}
+      {/* Imagen de Fondo usando la prop 'image' que viene de Cloudinary */}
       <Box
         position="absolute"
         inset={0}
-        bgImage={`url('${image}')`}
+        bgImage={`url('${image}')`} // Aquí se inyecta la URL
         bgSize="cover"
         bgPosition="center"
         transition="transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-        _groupHover={{ transform: "scale(1.1)" }} // Zoom suave
+        _groupHover={{ transform: "scale(1.1)" }}
       />
 
-      {/* 2. Overlay Gradiente (Para leer el texto) */}
       <Box
         position="absolute"
         inset={0}
@@ -63,7 +63,6 @@ const ImageCard = ({ title, description, image, link, linkText, icon }) => {
         }}
       />
 
-      {/* 3. Contenido */}
       <Flex
         direction="column"
         justify="flex-end"
@@ -98,7 +97,7 @@ const ImageCard = ({ title, description, image, link, linkText, icon }) => {
   );
 };
 
-// --- TARJETA DE CONSEJOS (Central) ---
+// --- TARJETA DE CONSEJOS (Sin cambios) ---
 const TipsCard = () => {
   const bg = useColorModeValue("white", "gray.800");
 
@@ -180,7 +179,8 @@ const Tourism = () => {
         </VStack>
 
         <SimpleGrid columns={{ base: 1, lg: 3 }} spacing={8}>
-          {/* 1. TripAdvisor (Imagen: Montaña) */}
+          
+          {/* 1. TripAdvisor */}
           <MotionBox
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -190,14 +190,15 @@ const Tourism = () => {
             <ImageCard
               title="Atracciones Top"
               description="Descubre qué opinan otros viajeros sobre el Teleférico Mukumbarí, la Laguna de Mucubají y más."
-              image="/assets/images/Montaña.jpeg" // Usamos tus imágenes locales
+              // --- CORRECCIÓN AQUÍ: Usamos la variable TourismImage ---
+              image={TourismImage} 
               link="https://www.tripadvisor.com.ve/Attractions-g316050-Activities-Merida_Andean_Region.html"
               linkText="Ver en TripAdvisor"
               icon={FaTripadvisor}
             />
           </MotionBox>
 
-          {/* 2. Consejos (Tarjeta Limpia) */}
+          {/* 2. Consejos */}
           <MotionBox
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -207,7 +208,7 @@ const Tourism = () => {
             <TipsCard />
           </MotionBox>
 
-          {/* 3. Guías (Imagen: Recreación/Pueblo) */}
+          {/* 3. Guías */}
           <MotionBox
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -217,7 +218,8 @@ const Tourism = () => {
             <ImageCard
               title="Guías de Rutas"
               description="Mapas detallados, rutas de senderismo y recorridos por los pueblos del páramo merideño."
-              image="/assets/images/Recreacion.jpg" // Usamos tus imágenes locales
+              // --- CORRECCIÓN AQUÍ: Usamos la variable HikingImage ---
+              image={HikingImage}
               link="https://www.venezuelatuya.com/andes/guia_turistica_de_merida.htm"
               linkText="Leer Guía Completa"
               icon={FaMapMarkedAlt}

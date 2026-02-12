@@ -1,73 +1,128 @@
-# Altura Andina Hotel & Spa
+# 🏔️ Altura Andina Hotel & Spa
 
-## Descripción
+![MERN Stack](https://img.shields.io/badge/MERN-Full%20Stack-blue)
+![Status](https://img.shields.io/badge/Status-MVP%20Complete-success)
 
-Este proyecto consiste en la creación de una landing page para el Altura Andina Hotel & Spa, ubicado en el estado Mérida, Venezuela. La página está desarrollada como una Single Page Application (SPA) utilizando React, Vite, React Router y un servidor con Node.js y Express.
+## 📋 Descripción
 
-La página web está diseñada para promocionar las instalaciones, servicios y ofertas del hotel, ofreciendo una experiencia interactiva y atractiva para los usuarios. Además, proporciona información útil y consejos de viaje relacionados con el estado de Mérida, Venezuela.
+**Altura Andina** ha evolucionado de una simple landing page a una **Aplicación Web Full Stack** robusta para la gestión y reserva de un hotel de lujo en Mérida, Venezuela.
 
-## Funcionalidades
-- Visualización de información sobre el hotel, incluyendo servicios, comodidades y ubicación.
-- Reserva de habitaciones a través de un formulario interactivo.
-- Consejos de viaje y guías turísticas relacionados con el estado de Mérida, Venezuela.
-- Visualización de promociones especiales y ofertas de temporada.
-  
-## Tecnologías Utilizadas
-- [React](https://es.react.dev/) + [Vite](https://vitejs.dev/): React es una biblioteca de JavaScript para crear interfaces de usuario. Vite es una herramienta de desarrollo web que ofrece un rápido arranque, actualización instantánea de módulos y optimización de producción.
-- [React Router]([https://www.npmjs.com/package/react-router-dom): Librería para el enrutamiento de aplicaciones React.
-- [Node.js](https://nodejs.org/en): Node.js es un entorno de ejecución de JavaScript que permite ejecutar código JavaScript fuera del navegador.
-- [Express](https://expressjs.com/es/): Express es un marco de aplicación web para Node.js que facilita la creación de servidores web y API. 
-- [React Spring](https://www.react-spring.dev): Biblioteca para animaciones fluidas en React.
-- [Material UI](https://mui.com): Biblioteca de componentes de React para un diseño rápido y fácil.
-- [Chakra UI](https://chakra-ui.com): Biblioteca de componentes accesibles y altamente personalizables para React.
-- [Tailwind](https://tailwindcss.com/): Tailwind es un marco de CSS que ofrece clases de utilidad personalizables y de bajo nivel para diseñar interfaces de usuario.
+Este proyecto demuestra la implementación de una arquitectura **MERN (MongoDB, Express, React, Node.js)** completa, integrando servicios de terceros para resolver problemas reales de negocio: pagos en línea, gestión de multimedia, notificaciones transaccionales y datos meteorológicos en tiempo real.
 
-## Guía de Instalación
+El objetivo fue crear una experiencia de usuario fluida (SPA) que permita desde la exploración visual de las habitaciones hasta la confirmación segura de la reserva.
 
-1. Clona el repositorio:
+## ✨ Características Principales
 
-  ```
-git clone https://github.com/Joshua-desings/ALTURA-ANDINA.git
-  ```
-2. Instala las dependencias en los directorios **Backend** y **Frontend**:
+### 🏨 Frontend (Experiencia de Usuario)
+* **Diseño Moderno:** Interfaz construida con **Chakra UI** y animaciones fluidas con **Framer Motion**.
+* **Reservas Híbridas:** Opción de "Pagar Ahora" (Stripe) o "Pagar en Hotel" (Confirmación por Email).
+* **Widget Climático:** Integración con OpenWeatherMap para mostrar el clima real de la Sierra Nevada.
+* **Optimización de Medios:** Imágenes de alta resolución servidas dinámicamente desde **Cloudinary**.
+* **Feedback Visual:** Sistema de notificaciones (Toasts) y validaciones de formularios en tiempo real.
 
-  ```
-cd Backend
-npm install
-cd Frontend
-npm install
-  ```
+### ⚙️ Backend (Lógica y Seguridad)
+* **API RESTful:** Desarrollada con Node.js y Express.
+* **Base de Datos NoSQL:** Modelado de datos con **Mongoose** (Habitaciones, Usuarios, Reservas).
+* **Seguridad Bancaria:** Integración de **Stripe Payment Intents** para procesar pagos sin almacenar datos sensibles.
+* **Sistema de Correos:** Envío automático de confirmaciones y recibos usando **Nodemailer** (Gmail SMTP).
+* **Script de Semilla:** Base de datos poblada automáticamente con datos de prueba y URLs optimizadas.
 
-3. Crea un archivo **.env** en la carpeta **Backend** con las siguientes variables:
+## 🛠️ Tecnologías Utilizadas
 
-  ```
-EMAIL_FROM=Tu email verificado por SendGrid
-SENDGRID_API_KEY=Tu API key verificada por SendGrid
- ```
-Cambia la API en el archivo services/api.js por tu API de OpenWeatherMap.
+**Frontend:**
+* [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+* [Chakra UI](https://chakra-ui.com/) (Componentes)
+* [Framer Motion](https://www.framer.com/motion/) (Animaciones)
+* [React Router DOM](https://reactrouter.com/)
+* [Stripe.js](https://stripe.com/docs/js)
 
-4. Inicia el servidor y la aplicación frontend en terminales separadas:
+**Backend:**
+* [Node.js](https://nodejs.org/) & [Express](https://expressjs.com/)
+* [MongoDB](https://www.mongodb.com/) & [Mongoose](https://mongoosejs.com/)
+* [Nodemailer](https://nodemailer.com/)
+* [Cloudinary SDK](https://cloudinary.com/)
 
- ```
-# En la carpeta Backend
-npm run dev
+## 🚀 Guía de Instalación Local
 
-# En la carpeta Frontend
-npm run dev
-```
-Accede a la aplicación en tu navegador visitando http://localhost:3000.
+Sigue estos pasos para desplegar el proyecto en tu máquina:
 
-## Autor
+1.  **Clona el repositorio:**
+    ```bash
+    git clone [https://github.com/JoshuaFreelancer/ALTURA-ANDINA.git](https://github.com/JoshuaFreelancer/ALTURA-ANDINA.git)
+    ```
 
-- **@Joshua-designs** - [GitHub](https://github.com/Joshua-designs)
+2.  **Instala las dependencias:**
+    
+    *Backend:*
+    ```bash
+    cd backend
+    npm install
+    ```
+    
+    *Frontend:*
+    ```bash
+    cd frontend
+    npm install
+    ```
 
-## Recursos Adicionales
+3.  **Configura las Variables de Entorno (.env):**
+    Debes crear un archivo `.env` en la carpeta `backend` con las siguientes claves:
 
-- [Figma de la App](https://www.figma.com/file/mwhpOqIa9AIdlYwH5FiJM0/Altura-Andina-Hotel-%26-Spa?type=design&node-id=3%3A2&mode=design&t=iJAVacy3r5DrDAaW-1)
-- [Video Explicativo](https://youtu.be/gnzBwIcVtIE)
-- [Informe Detallado](https://docs.google.com/document/d/1HK4WBP0tSBr-Qa2dnReWWGbKBzx9qBFfPyUGuvadzEs/edit?usp=sharing)
+    ```env
+    PORT=5000
+    MONGODB_URI=tu_string_de_conexion_mongo
+    
+    # Configuración de Correo (Nodemailer)
+    EMAIL_USER=tu_correo@gmail.com
+    EMAIL_PASS=tu_contraseña_de_aplicacion
+    
+    # Pagos (Stripe)
+    STRIPE_SECRET_KEY=sk_test_...
+    
+    # Clima
+    WEATHER_API_KEY=tu_api_key_openweather
+    ```
+    
+    Y en la carpeta `frontend` crea otro `.env`:
+    
+    ```env
+    VITE_API_URL=http://localhost:5000/api
+    VITE_STRIPE_PUBLIC_KEY=pk_test_...
+    ```
 
-## Futuras Actualizaciones
+4.  **Poblar la Base de Datos (Opcional):**
+    Si quieres cargar las habitaciones con imágenes de Cloudinary:
+    ```bash
+    cd backend
+    node seed.js
+    ```
 
-- Integración de una base de datos como MongoDB para almacenar información de usuarios y reservas.
-- Mejoras en la seguridad del sistema, incluyendo medidas como autenticación cifrado de contraseñas y cifrado de datos sensibles.
+5.  **Ejecutar el Proyecto:**
+    Abre dos terminales:
+
+    ```bash
+    # Terminal 1 (Backend)
+    npm run dev
+    
+    # Terminal 2 (Frontend)
+    npm run dev
+    ```
+
+## 👤 Autor
+
+**Joshua Freelancer**
+* GitHub: [@JoshuaFreelancer](https://github.com/JoshuaFreelancer)
+* Portafolio: [https://joshuafreelancer.github.io/](https://joshuafreelancer.github.io/)
+
+## 🎨 Recursos de Diseño
+
+* [Figma del Proyecto](https://www.figma.com/file/mwhpOqIa9AIdlYwH5FiJM0/Altura-Andina-Hotel-%26-Spa?type=design&node-id=3%3A2&mode=design&t=iJAVacy3r5DrDAaW-1) *(Nota: Este es el diseño conceptual inicial. La implementación final incluye mejoras significativas de UX/UI).*
+
+## 🔮 Futuras Mejoras
+
+* **Dashboard Administrativo:** Panel privado para gestionar disponibilidad y precios.
+* **Autenticación de Usuarios:** Login persistente para guardar historial de reservas.
+* **Multi-idioma:** Soporte i18n para inglés y español.
+
+---
+*Desarrollado con ❤️ y mucho código desde Venezuela.*
